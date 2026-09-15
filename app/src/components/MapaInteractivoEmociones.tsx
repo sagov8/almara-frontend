@@ -19,6 +19,8 @@ import {
   X,
   Radio,
   BarChart2,
+  WifiOff,
+  Sparkles,
 } from 'lucide-react-native';
 import {
   CeldaMapaEmocional,
@@ -29,6 +31,10 @@ import {
 import { LeyendaEmociones } from './LeyendaEmociones';
 import { IconoEmocion } from './IconoEmocion';
 import { ModalDetalleZona } from './ModalDetalleZona';
+import {
+  servicioWebSocketMapa,
+  EstadoConexionWebSocket,
+} from '../services/servicioWebSocketMapa';
 
 interface PropiedadesMapa {
   onSeleccionarZona?: (celda: CeldaMapaEmocional) => void;
@@ -136,6 +142,9 @@ const HTML_OPENSTREETMAP_POPAYAN = `<!DOCTYPE html>
     const capaPoligonos = L.layerGroup().addTo(map);
     const capaMarcadores = L.layerGroup().addTo(map);
 
+    var celdasEnMapa = [];
+    var idSeleccionadaActual = null;
+
     map.on('zoomend', function() {
       const z = map.getZoom();
       window.parent.postMessage({ tipo: 'CAMBIO_ZOOM', zoom: z }, '*');
@@ -145,7 +154,11 @@ const HTML_OPENSTREETMAP_POPAYAN = `<!DOCTYPE html>
       if (!e.data) return;
       const msg = e.data;
       if (msg.tipo === 'CARGAR_CELDAS') {
-        renderizarCeldas(msg.celdas, msg.idSeleccionada);
+        celdasEnMapa = msg.celdas || [];
+        idSeleccionadaActual = msg.idSeleccionada;
+        renderizarCeldas(celdasEnMapa, idSeleccionadaActual);
+      } else if (msg.tipo === 'ACTUALIZAR_CELDA') {
+        actualizarCeldaIndividual(msg.celda, msg.idSeleccionada);
       } else if (msg.tipo === 'ZOOM_IN') {
         map.zoomIn();
       } else if (msg.tipo === 'ZOOM_OUT') {
@@ -155,7 +168,28 @@ const HTML_OPENSTREETMAP_POPAYAN = `<!DOCTYPE html>
       }
     });
 
+    function actualizarCeldaIndividual(nuevaCelda, idSeleccionada) {
+      if (!nuevaCelda || !nuevaCelda.idCeldaH3) return;
+      var encontrada = false;
+      for (var i = 0; i < celdasEnMapa.length; i++) {
+        if (celdasEnMapa[i].idCeldaH3 === nuevaCelda.idCeldaH3) {
+          celdasEnMapa[i] = nuevaCelda;
+          encontrada = true;
+          break;
+        }
+      }
+      if (!encontrada) {
+        celdasEnMapa.push(nuevaCelda);
+      }
+      if (idSeleccionada !== undefined) {
+        idSeleccionadaActual = idSeleccionada;
+      }
+      renderizarCeldas(celdasEnMapa, idSeleccionadaActual);
+    }
+
     function renderizarCeldas(celdas, idSeleccionada) {
+      celdasEnMapa = celdas || [];
+      idSeleccionadaActual = idSeleccionada;
       capaPoligonos.clearLayers();
       capaMarcadores.clearLayers();
       if (!celdas || !celdas.length) return;
@@ -224,8 +258,83 @@ export const MapaInteractivoEmociones: React.FC<PropiedadesMapa> = ({ onSeleccio
   const [todasLasCeldas, setTodasLasCeldas] = useState<CeldaMapaEmocional[]>([]);
   const [modalProteccionVisible, setModalProteccionVisible] = useState<boolean>(false);
   const [modalDetalleVisible, setModalDetalleVisible] = useState<boolean>(false);
+  const [estadoConexion, setEstadoConexion] = useState<EstadoConexionWebSocket>('CONECTANDO');
+  const [alertaActualizacion, setAlertaActualizacion] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const mapaListoRef = useRef<boolean>(false);
+
+  // Conexión en tiempo real por WebSocket (HU-07: Observer Pattern)
+  useEffect(() => {
+    servicioWebSocketMapa.conectar('/topic/mapa/popayan');
+
+    const desuscribirEstado = servicioWebSocketMapa.suscribirEstado((nuevoEstado) => {
+      setEstadoConexion(nuevoEstado);
+    });
+
+    const desuscribirActualizaciones = servicioWebSocketMapa.suscribirActualizaciones((celdaActualizada) => {
+      // 1. Actualizar datosMapa sin recargar la pantalla
+      setDatosMapa((prev) => {
+        if (!prev) return prev;
+        const yaExiste = prev.celdasVisibles.some((c) => c.idCeldaH3 === celdaActualizada.idCeldaH3);
+        let nuevasVisibles: CeldaMapaEmocional[];
+        if (yaExiste) {
+          nuevasVisibles = prev.celdasVisibles.map((c) =>
+            c.idCeldaH3 === celdaActualizada.idCeldaH3 ? celdaActualizada : c
+          );
+        } else if (celdaActualizada.cumpleUmbral) {
+          nuevasVisibles = [...prev.celdasVisibles, celdaActualizada];
+        } else {
+          nuevasVisibles = prev.celdasVisibles;
+        }
+        return {
+          ...prev,
+          celdasVisibles: nuevasVisibles,
+          totalCeldasVisibles: nuevasVisibles.length,
+        };
+      });
+
+      // 2. Actualizar todas las celdas (incluidas las que están en reserva)
+      setTodasLasCeldas((prev) => {
+        const existe = prev.some((c) => c.idCeldaH3 === celdaActualizada.idCeldaH3);
+        return existe
+          ? prev.map((c) => (c.idCeldaH3 === celdaActualizada.idCeldaH3 ? celdaActualizada : c))
+          : [...prev, celdaActualizada];
+      });
+
+      // 3. Notificar al iframe de Leaflet / OpenStreetMap para transición suave
+      if (iframeRef.current && iframeRef.current.contentWindow) {
+        iframeRef.current.contentWindow.postMessage(
+          {
+            tipo: 'ACTUALIZAR_CELDA',
+            celda: celdaActualizada,
+            idSeleccionada: celdaSeleccionada?.idCeldaH3,
+          },
+          '*'
+        );
+      }
+
+      // 4. Si la celda actualizada coincide con la celda seleccionada, actualizarla en vivo
+      setCeldaSeleccionada((actual) => {
+        if (actual && actual.idCeldaH3 === celdaActualizada.idCeldaH3) {
+          return celdaActualizada;
+        }
+        return actual;
+      });
+
+      // 5. Toast sutil de confirmación visual
+      const nombreMostrar = celdaActualizada.nombreZona || 'Zona urbana';
+      const emocionMostrar = celdaActualizada.nombreEmocion || 'actualizada';
+      setAlertaActualizacion(`${nombreMostrar} cambió a ${emocionMostrar}`);
+      setTimeout(() => {
+        setAlertaActualizacion(null);
+      }, 3500);
+    });
+
+    return () => {
+      desuscribirEstado();
+      desuscribirActualizaciones();
+    };
+  }, [celdaSeleccionada]);
 
   // Escuchar mensajes provenientes del mapa OpenStreetMap / Leaflet
   useEffect(() => {
@@ -334,9 +443,33 @@ export const MapaInteractivoEmociones: React.FC<PropiedadesMapa> = ({ onSeleccio
     <View style={estilos.contenedor}>
       {/* Barra superior con indicador en tiempo real y selector de resolución */}
       <View style={estilos.barraSuperior}>
-        <View style={estilos.badgeTiempoReal}>
-          <Radio size={14} color="#EF4444" strokeWidth={2.5} />
-          <Text style={estilos.textoTiempoReal}>En tiempo real</Text>
+        <View
+          style={[
+            estilos.badgeTiempoReal,
+            estadoConexion === 'CONECTADO' && estilos.badgeTiempoRealConectado,
+            estadoConexion === 'RECONECTANDO' && estilos.badgeTiempoRealReconectando,
+          ]}
+        >
+          {estadoConexion === 'CONECTADO' ? (
+            <Radio size={14} color="#15803D" strokeWidth={2.5} />
+          ) : estadoConexion === 'RECONECTANDO' ? (
+            <RotateCcw size={14} color="#B45309" strokeWidth={2.5} />
+          ) : (
+            <WifiOff size={14} color="#64748B" strokeWidth={2.5} />
+          )}
+          <Text
+            style={[
+              estilos.textoTiempoReal,
+              estadoConexion === 'CONECTADO' && estilos.textoTiempoRealConectado,
+              estadoConexion === 'RECONECTANDO' && estilos.textoTiempoRealReconectando,
+            ]}
+          >
+            {estadoConexion === 'CONECTADO'
+              ? 'En tiempo real (En vivo)'
+              : estadoConexion === 'RECONECTANDO'
+              ? 'Reconectando...'
+              : 'Sin conexión en vivo'}
+          </Text>
         </View>
 
         <View style={estilos.chipResolucion}>
@@ -357,6 +490,13 @@ export const MapaInteractivoEmociones: React.FC<PropiedadesMapa> = ({ onSeleccio
 
       {/* Contenedor del Mapa OpenStreetMap de Popayán */}
       <View style={estilos.lienzoMapa}>
+        {/* Banner flotante de actualización recibida por WebSocket */}
+        {alertaActualizacion && (
+          <View style={estilos.bannerAlertaFlotante}>
+            <Sparkles size={14} color="#047857" strokeWidth={2.2} />
+            <Text style={estilos.textoAlertaFlotante}>{alertaActualizacion}</Text>
+          </View>
+        )}
         {Platform.OS === 'web' ? (
           // @ts-ignore
           <iframe
@@ -588,10 +728,49 @@ const estilos = StyleSheet.create({
     borderColor: '#FEE2E2',
     gap: 6,
   },
+  badgeTiempoRealConectado: {
+    backgroundColor: '#F0FDF4',
+    borderColor: '#BBF7D0',
+  },
+  badgeTiempoRealReconectando: {
+    backgroundColor: '#FFFBEB',
+    borderColor: '#FDE68A',
+  },
   textoTiempoReal: {
     fontSize: 11,
     fontWeight: '700',
     color: '#991B1B',
+  },
+  textoTiempoRealConectado: {
+    color: '#15803D',
+  },
+  textoTiempoRealReconectando: {
+    color: '#B45309',
+  },
+  bannerAlertaFlotante: {
+    position: 'absolute',
+    top: 14,
+    alignSelf: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 6,
+    zIndex: 40,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  textoAlertaFlotante: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#065F46',
   },
   chipResolucion: {
     backgroundColor: '#F1F5F9',

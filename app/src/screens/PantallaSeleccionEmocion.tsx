@@ -37,6 +37,7 @@ import {
 } from '../services/servicioEmocion';
 
 import { BarraNavegacionInferior, PestañaNavegacion } from '../components/BarraNavegacionInferior';
+import { reiniciarTokenSesion } from '../services/servicioSesion';
 
 interface PropiedadesPantallaSeleccionEmocion {
   alNavegar?: (pestaña: PestañaNavegacion) => void;
@@ -414,10 +415,27 @@ export const PantallaSeleccionEmocion: React.FC<PropiedadesPantallaSeleccionEmoc
                 setNivelIntensidad(INTENSIDAD_PREDETERMINADA);
                 setComentarioTexto('');
                 setRespuestaComentario(null);
+                reiniciarTokenSesion();
+                setSegundosBloqueoRestantes(0);
                 if (alNavegar) alNavegar('explorar');
               }}
             >
-              <Text style={estilos.textoBotonModal}>🗺️ Ver en el Mapa</Text>
+              <Text style={estilos.textoBotonModal}>🗺️ Ver en el Mapa en Vivo</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[estilos.botonCerrarModal, { backgroundColor: '#10B981', marginBottom: 10 }]}
+              onPress={() => {
+                setMostrarModalConfirmacion(false);
+                setEmocionSeleccionada(null);
+                setNivelIntensidad(INTENSIDAD_PREDETERMINADA);
+                setComentarioTexto('');
+                setRespuestaComentario(null);
+                reiniciarTokenSesion();
+                setSegundosBloqueoRestantes(0);
+              }}
+            >
+              <Text style={estilos.textoBotonModal}>➕ Registrar otra emoción (Modo prueba)</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -428,6 +446,8 @@ export const PantallaSeleccionEmocion: React.FC<PropiedadesPantallaSeleccionEmoc
                 setNivelIntensidad(INTENSIDAD_PREDETERMINADA);
                 setComentarioTexto('');
                 setRespuestaComentario(null);
+                reiniciarTokenSesion();
+                setSegundosBloqueoRestantes(0);
               }}
             >
               <Text style={estilos.textoBotonModal}>Cerrar</Text>

@@ -104,8 +104,8 @@ export const SelectorUbicacion: React.FC<PropsSelectorUbicacion> = ({
       {/* Banner de Privacidad por Diseño */}
       <View style={estilos.bannerPrivacidad}>
         <Text style={estilos.textoBannerPrivacidad}>
-          🛡️ <Text style={estilos.negrita}>Privacidad por Diseño:</Text> Tus coordenadas GPS exactas nunca se
-          almacenan ni se asocian a ti. Se transforman inmediatamente en un hexágono urbano anónimo (H3 resolución 9).
+          🛡️ <Text style={estilos.negrita}>Aviso de privacidad:</Text> Tus coordenadas GPS exactas nunca se
+          almacenan ni se asocian a ti. Se transforman para compartirse de manera anónima.
         </Text>
       </View>
 

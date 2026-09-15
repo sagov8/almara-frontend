@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Alert,
   Modal,
+  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -12,19 +13,79 @@ import {
   View,
 } from 'react-native';
 import { TarjetaEmocion } from '../components/TarjetaEmocion';
+import { SelectorIntensidad } from '../components/SelectorIntensidad';
+import { SelectorUbicacion, EstadoUbicacion } from '../components/SelectorUbicacion';
 import { DefinicionEmocion, LISTA_EMOCIONES } from '../constants/emociones';
 import {
+  ESCALA_INTENSIDAD,
+  INTENSIDAD_PREDETERMINADA,
+  obtenerEtiquetaIntensidad,
+} from '../constants/intensidades';
+import {
+  ElementoCatalogoZona,
+  LISTA_ZONAS_PREDETERMINADAS,
+  enviarRegistroIntensidad,
   enviarSeleccionEmocion,
+  obtenerCatalogoEmociones,
+  obtenerCatalogoZonas,
   ErrorRegistroEmocion,
   RespuestaRegistroEmocion,
+  RespuestaRegistroIntensidad,
 } from '../services/servicioEmocion';
 
 export const PantallaSeleccionEmocion: React.FC = () => {
+  const [catalogoEmociones, setCatalogoEmociones] = useState<DefinicionEmocion[]>(LISTA_EMOCIONES);
+  const [catalogoZonas, setCatalogoZonas] = useState<ElementoCatalogoZona[]>(LISTA_ZONAS_PREDETERMINADAS);
+  const [cargandoCatalogos, setCargandoCatalogos] = useState<boolean>(true);
   const [emocionSeleccionada, setEmocionSeleccionada] = useState<DefinicionEmocion | null>(null);
+  const [nivelIntensidad, setNivelIntensidad] = useState<number>(INTENSIDAD_PREDETERMINADA);
   const [estaEnviando, setEstaEnviando] = useState<boolean>(false);
   const [respuestaExitosa, setRespuestaExitosa] = useState<RespuestaRegistroEmocion | null>(null);
+  const [respuestaIntensidad, setRespuestaIntensidad] = useState<RespuestaRegistroIntensidad | null>(null);
   const [segundosBloqueoRestantes, setSegundosBloqueoRestantes] = useState<number>(0);
   const [mostrarModalConfirmacion, setMostrarModalConfirmacion] = useState<boolean>(false);
+
+  const [ubicacion, setUbicacion] = useState<EstadoUbicacion>({
+    modo: 'MANUAL',
+    zonaManualId: 'ZONA-PARQUE-CALDAS',
+    nombreZona: 'Parque Caldas',
+  });
+
+  // Carga inicial de los catálogos oficiales desde la base de datos (HU-01, HU-04, HU-12)
+  useEffect(() => {
+    let montado = true;
+    async function inicializarCatalogos() {
+      try {
+        setCargandoCatalogos(true);
+        const [emocionesDb, zonasDb] = await Promise.all([
+          obtenerCatalogoEmociones(),
+          obtenerCatalogoZonas(),
+        ]);
+        if (montado) {
+          if (emocionesDb && emocionesDb.length > 0) {
+            setCatalogoEmociones(emocionesDb);
+          }
+          if (zonasDb && zonasDb.length > 0) {
+            setCatalogoZonas(zonasDb);
+            setUbicacion((prev) => ({
+              ...prev,
+              zonaManualId: prev.zonaManualId || zonasDb[0].zonaManualId,
+              nombreZona: prev.nombreZona || zonasDb[0].nombre,
+            }));
+          }
+        }
+      } catch (err) {
+        console.warn('Error cargando catálogos desde el backend:', err);
+      } finally {
+        if (montado) setCargandoCatalogos(false);
+      }
+    }
+
+    inicializarCatalogos();
+    return () => {
+      montado = false;
+    };
+  }, []);
 
   // Contador regresivo para el período de bloqueo (cooldown)
   useEffect(() => {
@@ -50,9 +111,10 @@ export const PantallaSeleccionEmocion: React.FC = () => {
   };
 
   /**
-   * Maneja el toque en una tarjeta de emoción (máximo 2 toques: seleccionar y confirmar).
+   * Maneja la selección de una tarjeta de emoción (HU-01).
+   * Habilita de inmediato (< 100 ms) el selector de intensidad (HU-02).
    */
-  const manejarSeleccionEmocion = async (emocion: DefinicionEmocion) => {
+  const manejarSeleccionEmocion = (emocion: DefinicionEmocion) => {
     if (segundosBloqueoRestantes > 0) {
       Alert.alert(
         'Período de Espera Activo',
@@ -63,14 +125,48 @@ export const PantallaSeleccionEmocion: React.FC = () => {
       return;
     }
 
+    // Actualización de estado en React: se habilita el selector en < 100 ms
     setEmocionSeleccionada(emocion);
+  };
 
-    // Segundo toque automático o inmediato para registrar en menos de 2 toques
+  /**
+   * Envía la emoción seleccionada (HU-01) y su intensidad asociada (HU-02),
+   * asegurando integridad referencial, inmutabilidad y tiempo de respuesta óptimo.
+   */
+  const manejarEnvioReporte = async () => {
+    if (!emocionSeleccionada) {
+      Alert.alert('Selección requerida', 'Por favor selecciona primero una emoción de la lista.');
+      return;
+    }
+
+    if (segundosBloqueoRestantes > 0) {
+      Alert.alert(
+        'Período de Espera Activo',
+        `Debes esperar ${formatearTiempo(segundosBloqueoRestantes)} antes de registrar otra emoción.`
+      );
+      return;
+    }
+
     try {
-      setEstaEnviando(true);
-      const respuesta = await enviarSeleccionEmocion(emocion.id);
-      setRespuestaExitosa(respuesta);
-      setSegundosBloqueoRestantes(respuesta.segundosBloqueo || 900);
+      // Opciones de ubicación para HU-04 (GPS o zona manual del catálogo DB)
+      const opcionesUbicacion =
+        ubicacion.modo === 'GPS' && ubicacion.latitud !== undefined && ubicacion.longitud !== undefined
+          ? { latitud: ubicacion.latitud, longitud: ubicacion.longitud }
+          : { zonaManualId: ubicacion.zonaManualId || 'ZONA-CHAPINERO' };
+
+      // Paso 1: Registrar emoción base y ubicación (HU-01 y HU-04) para obtener idEvento oficial
+      const resEmocion = await enviarSeleccionEmocion(emocionSeleccionada.id, opcionesUbicacion);
+      setRespuestaExitosa(resEmocion);
+
+      // Paso 2: Asociar e indicar intensidad (HU-02) con el idEvento generado
+      const resIntensidad = await enviarRegistroIntensidad(
+        resEmocion.idEvento,
+        nivelIntensidad
+      );
+      setRespuestaIntensidad(resIntensidad);
+
+      // Iniciar período de bloqueo de seguridad
+      setSegundosBloqueoRestantes(resEmocion.segundosBloqueo || 900);
       setMostrarModalConfirmacion(true);
     } catch (errorCapturado: any) {
       const error = errorCapturado as ErrorRegistroEmocion;
@@ -83,7 +179,7 @@ export const PantallaSeleccionEmocion: React.FC = () => {
       } else {
         Alert.alert(
           'Aviso',
-          error.mensaje || 'No se pudo conectar con el servidor. Se guardará tu preferencia localmente.'
+          error.mensaje || 'No se pudo registrar la emoción e intensidad con el servidor.'
         );
       }
     } finally {
@@ -138,31 +234,72 @@ export const PantallaSeleccionEmocion: React.FC = () => {
           </View>
         )}
 
-        {/* Grilla de Emociones (2 columnas como en el Mockup) */}
-        <View style={estilos.grillaEmociones}>
-          {LISTA_EMOCIONES.map((emocion) => (
-            <View key={emocion.id} style={estilos.columnaGrilla}>
-              <TarjetaEmocion
-                emocion={emocion}
-                seleccionada={emocionSeleccionada?.id === emocion.id}
-                alSeleccionar={manejarSeleccionEmocion}
-                deshabilitada={estaEnviando || segundosBloqueoRestantes > 0}
-              />
-            </View>
-          ))}
-          {/* Elemento vacío para balancear la última fila de 1 elemento */}
-          <View style={estilos.columnaGrilla} />
-        </View>
+        {/* Componente Selector de Ubicación (HU-04 - GPS y Catálogo de Zonas de BD) */}
+        <SelectorUbicacion
+          zonasDisponibles={catalogoZonas}
+          ubicacionActual={ubicacion}
+          alCambiarUbicacion={(nueva) => setUbicacion(nueva)}
+          deshabilitado={estaEnviando || segundosBloqueoRestantes > 0}
+        />
 
-        {estaEnviando && (
+        {/* Grilla de Emociones (HU-01 y HU-12 - Catálogo dinámico desde Base de Datos) */}
+        {cargandoCatalogos ? (
           <View style={estilos.contenedorCarga}>
-            <ActivityIndicator size="large" color="#10B981" />
-            <Text style={estilos.textoCarga}>Registrando tu emoción...</Text>
+            <ActivityIndicator size="small" color="#111827" />
+            <Text style={estilos.textoCarga}>Cargando catálogo oficial...</Text>
+          </View>
+        ) : (
+          <View style={estilos.grillaEmociones}>
+            {catalogoEmociones.map((emocion) => (
+              <View key={emocion.id} style={estilos.columnaGrilla}>
+                <TarjetaEmocion
+                  emocion={emocion}
+                  seleccionada={emocionSeleccionada?.id === emocion.id}
+                  alSeleccionar={manejarSeleccionEmocion}
+                  deshabilitada={estaEnviando || segundosBloqueoRestantes > 0}
+                />
+              </View>
+            ))}
+            {/* Elemento vacío para balancear la grilla de 2 columnas si es impar */}
+            {catalogoEmociones.length % 2 !== 0 && (
+              <View style={estilos.columnaGrilla} />
+            )}
           </View>
         )}
+
+        {/* Componente Selector de Intensidad (HU-02 - Mockup image2.png) */}
+        <SelectorIntensidad
+          nivelSeleccionado={nivelIntensidad}
+          alCambiarNivel={(nuevo) => setNivelIntensidad(nuevo)}
+          deshabilitado={!emocionSeleccionada || estaEnviando || segundosBloqueoRestantes > 0}
+        />
+
+        {/* Botón principal de acción para enviar reporte completo */}
+        <TouchableOpacity
+          style={[
+            estilos.botonEnviarReporte,
+            (!emocionSeleccionada || estaEnviando || segundosBloqueoRestantes > 0) &&
+              estilos.botonEnviarReporteDeshabilitado,
+          ]}
+          disabled={!emocionSeleccionada || estaEnviando || segundosBloqueoRestantes > 0}
+          onPress={manejarEnvioReporte}
+          activeOpacity={0.8}
+        >
+          {estaEnviando ? (
+            <ActivityIndicator color="#FFFFFF" size="small" />
+          ) : (
+            <Text style={estilos.textoBotonEnviar}>
+              {emocionSeleccionada
+                ? `Enviar Señal (${emocionSeleccionada.etiqueta} • Nivel ${nivelIntensidad} • ${
+                    ubicacion.modo === 'GPS' ? 'GPS' : ubicacion.nombreZona || 'Zona'
+                  })`
+                : 'Selecciona una emoción'}
+            </Text>
+          )}
+        </TouchableOpacity>
       </ScrollView>
 
-      {/* Modal de Confirmación Exitosa (Criterio 5) */}
+      {/* Modal de Confirmación Exitosa (HU-01, HU-02 y HU-04) */}
       <Modal
         visible={mostrarModalConfirmacion}
         transparent={true}
@@ -182,9 +319,9 @@ export const PantallaSeleccionEmocion: React.FC = () => {
               </Text>
             </View>
 
-            <Text style={estilos.tituloModal}>¡Emoción Registrada!</Text>
+            <Text style={estilos.tituloModal}>¡Reporte Registrado!</Text>
             <Text style={estilos.mensajeModal}>
-              Has seleccionado{' '}
+              Has registrado{' '}
               <Text
                 style={{
                   color: emocionSeleccionada?.colorPrincipal || '#10B981',
@@ -192,13 +329,37 @@ export const PantallaSeleccionEmocion: React.FC = () => {
                 }}
               >
                 {emocionSeleccionada?.etiqueta}
+              </Text>{' '}
+              con una intensidad de{' '}
+              <Text style={{ fontWeight: '700', color: '#111827' }}>
+                Nivel {nivelIntensidad} ({obtenerEtiquetaIntensidad(nivelIntensidad)})
               </Text>
-              . Tu reporte anónimo ha sido sumado al mapa colectivo de la ciudad.
+              .
+            </Text>
+
+            {/* Detalle Geoespacial Anónimo (HU-04) */}
+            <View style={estilos.badgeModalUbicacion}>
+              <Text style={estilos.textoBadgeUbicacion}>
+                📍 {respuestaExitosa?.nombreZona || ubicacion.nombreZona || 'Zona Urbana Registrada'}
+              </Text>
+              {respuestaExitosa?.idCeldaH3 && (
+                <Text style={estilos.textoBadgeCelda}>
+                  Celda H3 (Res 9): {respuestaExitosa.idCeldaH3}
+                </Text>
+              )}
+            </View>
+
+            <Text style={estilos.subtextoModalPrivacidad}>
+              Tu reporte 100% anónimo ha sido sumado al mapa colectivo de la comunidad Almara.
             </Text>
 
             <TouchableOpacity
               style={estilos.botonCerrarModal}
-              onPress={() => setMostrarModalConfirmacion(false)}
+              onPress={() => {
+                setMostrarModalConfirmacion(false);
+                setEmocionSeleccionada(null);
+                setNivelIntensidad(INTENSIDAD_PREDETERMINADA);
+              }}
             >
               <Text style={estilos.textoBotonModal}>Entendido</Text>
             </TouchableOpacity>
@@ -343,7 +504,35 @@ const estilos = StyleSheet.create({
     color: '#4B5563',
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: 24,
+    marginBottom: 16,
+  },
+  badgeModalUbicacion: {
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    marginBottom: 14,
+    width: '100%',
+  },
+  textoBadgeUbicacion: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
+  textoBadgeCelda: {
+    fontSize: 11,
+    color: '#6B7280',
+    marginTop: 2,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  subtextoModalPrivacidad: {
+    fontSize: 12,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 20,
   },
   botonCerrarModal: {
     backgroundColor: '#111827',
@@ -357,5 +546,30 @@ const estilos = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  botonEnviarReporte: {
+    backgroundColor: '#111827',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 16,
+    marginHorizontal: 8,
+    marginTop: 10,
+    marginBottom: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  botonEnviarReporteDeshabilitado: {
+    backgroundColor: '#9CA3AF',
+    opacity: 0.6,
+  },
+  textoBotonEnviar: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
   },
 });

@@ -54,6 +54,7 @@ export interface RespuestaRegistroEmocion {
   emocionRegistrada: string;
   idCeldaH3?: string;
   nombreZona?: string;
+  comentario?: string;
   fechaHoraEnvio: string;
   segundosBloqueo: number;
 }
@@ -78,6 +79,21 @@ export interface RespuestaRegistroIntensidad {
   idCeldaH3: string;
   mensaje: string;
   fechaHoraEnvio: string;
+}
+
+export interface SolicitudRegistroComentario {
+  idEvento: string;
+  comentario: string;
+}
+
+export interface RespuestaRegistroComentario {
+  idEvento: string;
+  comentario?: string;
+  mensaje: string;
+  emocion: string;
+  idCeldaH3: string;
+  fechaHoraEnvio: string;
+  commentContext?: string;
 }
 
 export interface ElementoCatalogoZona {
@@ -379,4 +395,42 @@ export async function enviarRegistroIntensidad(
   }
 
   return datos as RespuestaRegistroIntensidad;
+}
+
+/**
+ * Envía el comentario complementario y opcional de una emoción previamente seleccionada (HU-03).
+ * Tiempo de respuesta garantizado < 300 ms bajo condiciones normales (RNF Desempeño).
+ */
+export async function enviarRegistroComentario(
+  idEvento: string,
+  comentario: string
+): Promise<RespuestaRegistroComentario> {
+  const urlApi = obtenerUrlBaseEmociones();
+
+  const cuerpoPeticion: SolicitudRegistroComentario = {
+    idEvento,
+    comentario,
+  };
+
+  const respuesta = await fetch(`${urlApi}/comentario`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(cuerpoPeticion),
+  });
+
+  const datos = await respuesta.json();
+
+  if (!respuesta.ok) {
+    const error: ErrorRegistroEmocion = {
+      codigoEstado: respuesta.status,
+      error: datos.error || 'ERROR_COMENTARIO',
+      mensaje: datos.mensaje || 'No fue posible registrar el comentario de la emoción.',
+    };
+    throw error;
+  }
+
+  return datos as RespuestaRegistroComentario;
 }

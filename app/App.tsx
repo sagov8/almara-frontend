@@ -1,13 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { registerRootComponent } from 'expo';
-const { PantallaSeleccionEmocion } = require('./src/screens/PantallaSeleccionEmocion');
+import { PantallaSeleccionEmocion } from './src/screens/PantallaSeleccionEmocion';
+import { PantallaMapaExplorar } from './src/screens/PantallaMapaExplorar';
+import { PantallaPrivacidad } from './src/screens/PantallaPrivacidad';
+import { PestañaNavegacion } from './src/components/BarraNavegacionInferior';
 
 /**
- * Componente principal de la aplicación móvil Almara.
- * Despliega la pantalla de selección de emoción (HU-01).
+ * Componente raíz de la aplicación móvil Almara.
+ * Integra las historias de usuario HU-01 a HU-05 con navegación fluida entre pestañas:
+ * - [Inicio / Explorar]: Mapa interactivo colectivo de Popayán (HU-05)
+ * - [Registrar]: Flujo completo de emoción, intensidad, ubicación y comentario (HU-01 a HU-04)
+ * - [Privacidad]: Explicación amigable de Protección en Comunidad
  */
 export default function App() {
-  return React.createElement(PantallaSeleccionEmocion);
+  const [pestañaActiva, setPestañaActiva] = useState<PestañaNavegacion>('explorar');
+
+  switch (pestañaActiva) {
+    case 'registrar':
+      return <PantallaSeleccionEmocion alNavegar={setPestañaActiva} />;
+    case 'privacidad':
+      return <PantallaPrivacidad alNavegar={setPestañaActiva} />;
+    case 'explorar':
+    case 'inicio':
+    default:
+      return <PantallaMapaExplorar alNavegar={setPestañaActiva} />;
+  }
 }
 
 // Registra el componente raíz con AppRegistry de React Native ('main') para Expo

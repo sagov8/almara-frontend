@@ -15,6 +15,7 @@ import {
 import { TarjetaEmocion } from '../components/TarjetaEmocion';
 import { SelectorIntensidad } from '../components/SelectorIntensidad';
 import { SelectorUbicacion, EstadoUbicacion } from '../components/SelectorUbicacion';
+import { SelectorComentario } from '../components/SelectorComentario';
 import { DefinicionEmocion, LISTA_EMOCIONES } from '../constants/emociones';
 import {
   ESCALA_INTENSIDAD,
@@ -24,24 +25,34 @@ import {
 import {
   ElementoCatalogoZona,
   LISTA_ZONAS_PREDETERMINADAS,
+  enviarRegistroComentario,
   enviarRegistroIntensidad,
   enviarSeleccionEmocion,
   obtenerCatalogoEmociones,
   obtenerCatalogoZonas,
   ErrorRegistroEmocion,
+  RespuestaRegistroComentario,
   RespuestaRegistroEmocion,
   RespuestaRegistroIntensidad,
 } from '../services/servicioEmocion';
 
-export const PantallaSeleccionEmocion: React.FC = () => {
+import { BarraNavegacionInferior, PestañaNavegacion } from '../components/BarraNavegacionInferior';
+
+interface PropiedadesPantallaSeleccionEmocion {
+  alNavegar?: (pestaña: PestañaNavegacion) => void;
+}
+
+export const PantallaSeleccionEmocion: React.FC<PropiedadesPantallaSeleccionEmocion> = ({ alNavegar }) => {
   const [catalogoEmociones, setCatalogoEmociones] = useState<DefinicionEmocion[]>(LISTA_EMOCIONES);
   const [catalogoZonas, setCatalogoZonas] = useState<ElementoCatalogoZona[]>(LISTA_ZONAS_PREDETERMINADAS);
   const [cargandoCatalogos, setCargandoCatalogos] = useState<boolean>(true);
   const [emocionSeleccionada, setEmocionSeleccionada] = useState<DefinicionEmocion | null>(null);
   const [nivelIntensidad, setNivelIntensidad] = useState<number>(INTENSIDAD_PREDETERMINADA);
+  const [comentarioTexto, setComentarioTexto] = useState<string>('');
   const [estaEnviando, setEstaEnviando] = useState<boolean>(false);
   const [respuestaExitosa, setRespuestaExitosa] = useState<RespuestaRegistroEmocion | null>(null);
   const [respuestaIntensidad, setRespuestaIntensidad] = useState<RespuestaRegistroIntensidad | null>(null);
+  const [respuestaComentario, setRespuestaComentario] = useState<RespuestaRegistroComentario | null>(null);
   const [segundosBloqueoRestantes, setSegundosBloqueoRestantes] = useState<number>(0);
   const [mostrarModalConfirmacion, setMostrarModalConfirmacion] = useState<boolean>(false);
 
@@ -130,10 +141,10 @@ export const PantallaSeleccionEmocion: React.FC = () => {
   };
 
   /**
-   * Envía la emoción seleccionada (HU-01) y su intensidad asociada (HU-02),
-   * asegurando integridad referencial, inmutabilidad y tiempo de respuesta óptimo.
+   * Envía la emoción seleccionada (HU-01), su intensidad asociada (HU-02),
+   * y el comentario opcional (HU-03) asociado al mismo evento.
    */
-  const manejarEnvioReporte = async () => {
+  const manejarEnvioReporte = async (comentarioOpcional?: string) => {
     if (!emocionSeleccionada) {
       Alert.alert('Selección requerida', 'Por favor selecciona primero una emoción de la lista.');
       return;
@@ -148,11 +159,12 @@ export const PantallaSeleccionEmocion: React.FC = () => {
     }
 
     try {
+      setEstaEnviando(true);
       // Opciones de ubicación para HU-04 (GPS o zona manual del catálogo DB)
       const opcionesUbicacion =
         ubicacion.modo === 'GPS' && ubicacion.latitud !== undefined && ubicacion.longitud !== undefined
           ? { latitud: ubicacion.latitud, longitud: ubicacion.longitud }
-          : { zonaManualId: ubicacion.zonaManualId || 'ZONA-CHAPINERO' };
+          : { zonaManualId: ubicacion.zonaManualId || 'ZONA-PARQUE-CALDAS' };
 
       // Paso 1: Registrar emoción base y ubicación (HU-01 y HU-04) para obtener idEvento oficial
       const resEmocion = await enviarSeleccionEmocion(emocionSeleccionada.id, opcionesUbicacion);
@@ -164,6 +176,18 @@ export const PantallaSeleccionEmocion: React.FC = () => {
         nivelIntensidad
       );
       setRespuestaIntensidad(resIntensidad);
+
+      // Paso 3: Asociar comentario opcional (HU-03) si fue provisto
+      const textoAEnviar = comentarioOpcional !== undefined ? comentarioOpcional : comentarioTexto;
+      if (textoAEnviar && textoAEnviar.trim().length > 0) {
+        const resComentario = await enviarRegistroComentario(
+          resEmocion.idEvento,
+          textoAEnviar.trim()
+        );
+        setRespuestaComentario(resComentario);
+      } else {
+        setRespuestaComentario(null);
+      }
 
       // Iniciar período de bloqueo de seguridad
       setSegundosBloqueoRestantes(resEmocion.segundosBloqueo || 900);
@@ -179,7 +203,7 @@ export const PantallaSeleccionEmocion: React.FC = () => {
       } else {
         Alert.alert(
           'Aviso',
-          error.mensaje || 'No se pudo registrar la emoción e intensidad con el servidor.'
+          error.mensaje || 'No se pudo registrar el reporte con el servidor.'
         );
       }
     } finally {
@@ -274,6 +298,23 @@ export const PantallaSeleccionEmocion: React.FC = () => {
           deshabilitado={!emocionSeleccionada || estaEnviando || segundosBloqueoRestantes > 0}
         />
 
+        {/* Componente Selector de Comentario Opcional (HU-03 - Mockup image4.png) */}
+        {emocionSeleccionada && (
+          <SelectorComentario
+            comentarioInicial={comentarioTexto}
+            alConfirmarComentario={(nuevo) => {
+              setComentarioTexto(nuevo);
+              manejarEnvioReporte(nuevo);
+            }}
+            alOmitir={() => {
+              setComentarioTexto('');
+              manejarEnvioReporte('');
+            }}
+            estaEnviando={estaEnviando}
+            deshabilitado={segundosBloqueoRestantes > 0}
+          />
+        )}
+
         {/* Botón principal de acción para enviar reporte completo */}
         <TouchableOpacity
           style={[
@@ -282,7 +323,7 @@ export const PantallaSeleccionEmocion: React.FC = () => {
               estilos.botonEnviarReporteDeshabilitado,
           ]}
           disabled={!emocionSeleccionada || estaEnviando || segundosBloqueoRestantes > 0}
-          onPress={manejarEnvioReporte}
+          onPress={() => manejarEnvioReporte()}
           activeOpacity={0.8}
         >
           {estaEnviando ? (
@@ -299,7 +340,7 @@ export const PantallaSeleccionEmocion: React.FC = () => {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Modal de Confirmación Exitosa (HU-01, HU-02 y HU-04) */}
+      {/* Modal de Confirmación Exitosa (HU-01, HU-02, HU-03 y HU-04) */}
       <Modal
         visible={mostrarModalConfirmacion}
         transparent={true}
@@ -349,9 +390,35 @@ export const PantallaSeleccionEmocion: React.FC = () => {
               )}
             </View>
 
+            {/* Detalle del Comentario Opcional (HU-03) */}
+            <View style={estilos.badgeModalComentario}>
+              <Text style={estilos.textoBadgeComentarioTitulo}>
+                💬 {respuestaComentario?.comentario ? 'Comentario Registrado:' : 'Contexto Opcional:'}
+              </Text>
+              <Text style={estilos.textoBadgeComentarioCuerpo}>
+                {respuestaComentario?.comentario
+                  ? `"${respuestaComentario.comentario}"`
+                  : 'Sin comentario adicional (opcional)'}
+              </Text>
+            </View>
+
             <Text style={estilos.subtextoModalPrivacidad}>
               Tu reporte 100% anónimo ha sido sumado al mapa colectivo de la comunidad Almara.
             </Text>
+
+            <TouchableOpacity
+              style={[estilos.botonCerrarModal, { backgroundColor: '#0284C7', marginBottom: 10 }]}
+              onPress={() => {
+                setMostrarModalConfirmacion(false);
+                setEmocionSeleccionada(null);
+                setNivelIntensidad(INTENSIDAD_PREDETERMINADA);
+                setComentarioTexto('');
+                setRespuestaComentario(null);
+                if (alNavegar) alNavegar('explorar');
+              }}
+            >
+              <Text style={estilos.textoBotonModal}>🗺️ Ver en el Mapa</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity
               style={estilos.botonCerrarModal}
@@ -359,13 +426,21 @@ export const PantallaSeleccionEmocion: React.FC = () => {
                 setMostrarModalConfirmacion(false);
                 setEmocionSeleccionada(null);
                 setNivelIntensidad(INTENSIDAD_PREDETERMINADA);
+                setComentarioTexto('');
+                setRespuestaComentario(null);
               }}
             >
-              <Text style={estilos.textoBotonModal}>Entendido</Text>
+              <Text style={estilos.textoBotonModal}>Cerrar</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
+
+      {/* Barra de navegación inferior */}
+      <BarraNavegacionInferior
+        pestañaActiva="registrar"
+        alCambiarPestaña={(p) => alNavegar && alNavegar(p)}
+      />
     </SafeAreaView>
   );
 };
@@ -527,6 +602,29 @@ const estilos = StyleSheet.create({
     color: '#6B7280',
     marginTop: 2,
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  badgeModalComentario: {
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    marginBottom: 14,
+    width: '100%',
+  },
+  textoBadgeComentarioTitulo: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#374151',
+    marginBottom: 3,
+  },
+  textoBadgeComentarioCuerpo: {
+    fontSize: 12,
+    color: '#4B5563',
+    fontStyle: 'italic',
+    textAlign: 'center',
   },
   subtextoModalPrivacidad: {
     fontSize: 12,

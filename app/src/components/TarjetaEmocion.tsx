@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { DefinicionEmocion } from '../constants/emociones';
+import { IconoEmocion } from './IconoEmocion';
 
 interface PropiedadesTarjetaEmocion {
   emocion: DefinicionEmocion;
@@ -34,9 +35,7 @@ export const TarjetaEmocion: React.FC<PropiedadesTarjetaEmocion> = ({
           { backgroundColor: emocion.colorFondoCirculo },
         ]}
       >
-        <Text style={[estilos.textoIcono, { color: emocion.colorPrincipal }]}>
-          {emocion.simboloFacial}
-        </Text>
+        <IconoEmocion emocion={emocion.id} color={emocion.colorPrincipal} size={36} />
       </View>
       <Text style={estilos.etiqueta}>{emocion.etiqueta}</Text>
     </TouchableOpacity>

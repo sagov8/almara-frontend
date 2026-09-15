@@ -13,10 +13,20 @@ import {
   View,
 } from 'react-native';
 import { TarjetaEmocion } from '../components/TarjetaEmocion';
+import { IconoEmocion } from '../components/IconoEmocion';
 import { SelectorIntensidad } from '../components/SelectorIntensidad';
 import { SelectorUbicacion, EstadoUbicacion } from '../components/SelectorUbicacion';
 import { SelectorComentario } from '../components/SelectorComentario';
 import { DefinicionEmocion, LISTA_EMOCIONES } from '../constants/emociones';
+import {
+  Bell,
+  User,
+  Clock,
+  MapPin,
+  MessageSquare,
+  Map,
+  Plus,
+} from 'lucide-react-native';
 import {
   ESCALA_INTENSIDAD,
   INTENSIDAD_PREDETERMINADA,
@@ -224,13 +234,13 @@ export const PantallaSeleccionEmocion: React.FC<PropiedadesPantallaSeleccionEmoc
             style={estilos.botonIcono}
             accessibilityLabel="Notificaciones"
           >
-            <Text style={estilos.simboloIcono}>🔔</Text>
+            <Bell size={18} color="#475569" strokeWidth={2} />
           </TouchableOpacity>
           <TouchableOpacity
             style={estilos.botonIcono}
             accessibilityLabel="Perfil de usuario"
           >
-            <Text style={estilos.simboloIcono}>👤</Text>
+            <User size={18} color="#475569" strokeWidth={2} />
           </TouchableOpacity>
         </View>
       </View>
@@ -250,8 +260,9 @@ export const PantallaSeleccionEmocion: React.FC<PropiedadesPantallaSeleccionEmoc
         {/* Indicador de bloqueo temporal si está activo */}
         {segundosBloqueoRestantes > 0 && (
           <View style={estilos.bannerBloqueo}>
+            <Clock size={16} color="#92400E" strokeWidth={2.2} />
             <Text style={estilos.textoBannerBloqueo}>
-              ⏱️ Próximo reporte disponible en:{' '}
+              {' '}Próximo reporte disponible en:{' '}
               <Text style={estilos.tiempoResaltado}>
                 {formatearTiempo(segundosBloqueoRestantes)}
               </Text>
@@ -356,9 +367,11 @@ export const PantallaSeleccionEmocion: React.FC<PropiedadesPantallaSeleccionEmoc
                 { backgroundColor: emocionSeleccionada?.colorFondoCirculo || '#D1FAE5' },
               ]}
             >
-              <Text style={estilos.iconoExitoTexto}>
-                {emocionSeleccionada?.simboloFacial || '✓'}
-              </Text>
+              <IconoEmocion
+                emocion={emocionSeleccionada?.id}
+                color={emocionSeleccionada?.colorPrincipal || '#10B981'}
+                size={38}
+              />
             </View>
 
             <Text style={estilos.tituloModal}>¡Reporte Registrado!</Text>
@@ -381,9 +394,12 @@ export const PantallaSeleccionEmocion: React.FC<PropiedadesPantallaSeleccionEmoc
 
             {/* Detalle Geoespacial Anónimo (HU-04) */}
             <View style={estilos.badgeModalUbicacion}>
-              <Text style={estilos.textoBadgeUbicacion}>
-                📍 {respuestaExitosa?.nombreZona || ubicacion.nombreZona || 'Zona Urbana Registrada'}
-              </Text>
+              <View style={estilos.filaModalBadge}>
+                <MapPin size={15} color="#1F2937" strokeWidth={2.2} />
+                <Text style={estilos.textoBadgeUbicacion}>
+                  {respuestaExitosa?.nombreZona || ubicacion.nombreZona || 'Zona Urbana Registrada'}
+                </Text>
+              </View>
               {respuestaExitosa?.idCeldaH3 && (
                 <Text style={estilos.textoBadgeCelda}>
                   Celda H3 (Res 9): {respuestaExitosa.idCeldaH3}
@@ -393,9 +409,12 @@ export const PantallaSeleccionEmocion: React.FC<PropiedadesPantallaSeleccionEmoc
 
             {/* Detalle del Comentario Opcional (HU-03) */}
             <View style={estilos.badgeModalComentario}>
-              <Text style={estilos.textoBadgeComentarioTitulo}>
-                💬 {respuestaComentario?.comentario ? 'Comentario Registrado:' : 'Contexto Opcional:'}
-              </Text>
+              <View style={estilos.filaModalBadge}>
+                <MessageSquare size={14} color="#374151" strokeWidth={2} />
+                <Text style={estilos.textoBadgeComentarioTitulo}>
+                  {respuestaComentario?.comentario ? 'Comentario Registrado:' : 'Contexto Opcional:'}
+                </Text>
+              </View>
               <Text style={estilos.textoBadgeComentarioCuerpo}>
                 {respuestaComentario?.comentario
                   ? `"${respuestaComentario.comentario}"`
@@ -408,7 +427,7 @@ export const PantallaSeleccionEmocion: React.FC<PropiedadesPantallaSeleccionEmoc
             </Text>
 
             <TouchableOpacity
-              style={[estilos.botonCerrarModal, { backgroundColor: '#0284C7', marginBottom: 10 }]}
+              style={[estilos.botonCerrarModal, { backgroundColor: '#0284C7', marginBottom: 10, flexDirection: 'row', gap: 8, justifyContent: 'center' }]}
               onPress={() => {
                 setMostrarModalConfirmacion(false);
                 setEmocionSeleccionada(null);
@@ -420,11 +439,12 @@ export const PantallaSeleccionEmocion: React.FC<PropiedadesPantallaSeleccionEmoc
                 if (alNavegar) alNavegar('explorar');
               }}
             >
-              <Text style={estilos.textoBotonModal}>🗺️ Ver en el Mapa en Vivo</Text>
+              <Map size={18} color="#FFFFFF" strokeWidth={2.2} />
+              <Text style={estilos.textoBotonModal}>Ver en el Mapa en Vivo</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[estilos.botonCerrarModal, { backgroundColor: '#10B981', marginBottom: 10 }]}
+              style={[estilos.botonCerrarModal, { backgroundColor: '#10B981', marginBottom: 10, flexDirection: 'row', gap: 8, justifyContent: 'center' }]}
               onPress={() => {
                 setMostrarModalConfirmacion(false);
                 setEmocionSeleccionada(null);
@@ -435,7 +455,8 @@ export const PantallaSeleccionEmocion: React.FC<PropiedadesPantallaSeleccionEmoc
                 setSegundosBloqueoRestantes(0);
               }}
             >
-              <Text style={estilos.textoBotonModal}>➕ Registrar otra emoción (Modo prueba)</Text>
+              <Plus size={18} color="#FFFFFF" strokeWidth={2.2} />
+              <Text style={estilos.textoBotonModal}>Registrar otra emoción (Modo prueba)</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -505,17 +526,18 @@ const estilos = StyleSheet.create({
   },
   encabezado: {
     alignItems: 'center',
-    marginVertical: 24,
+    marginTop: 12,
+    marginBottom: 14,
   },
   tituloPrincipal: {
-    fontSize: 28,
+    fontSize: 25,
     fontWeight: '800',
     color: '#111827',
-    marginBottom: 8,
+    marginBottom: 4,
     textAlign: 'center',
   },
   subtitulo: {
-    fontSize: 16,
+    fontSize: 14.5,
     color: '#6B7280',
     textAlign: 'center',
     paddingHorizontal: 20,
@@ -611,6 +633,11 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 14,
     width: '100%',
+  },
+  filaModalBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   textoBadgeUbicacion: {
     fontSize: 13,

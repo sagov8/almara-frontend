@@ -38,10 +38,48 @@ export interface VerificacionCorreoRespuesta {
   mensaje: string;
 }
 
+export interface LoginInstitucionalSolicitud {
+  correoInstitucional: string;
+  password: string;
+}
+
+export interface LoginInstitucionalRespuesta {
+  tokenAcceso: string;
+  tipoToken: string;
+  expiraEnSegundos: number;
+  idInstitucion: string;
+  razonSocial: string;
+  correoInstitucional: string;
+  rol: string;
+  codigoPlan: string;
+  nombrePlan: string;
+  estadoSuscripcion: string;
+  modulosHabilitados: string[];
+  requiereRenovacion: boolean;
+  rutaRedireccion: string;
+}
+
 export interface ErrorApi {
   codigoEstado: number;
   error: string;
   mensaje: string;
   ruta?: string;
   detallesAdicionales?: Record<string, unknown>;
+}
+
+export interface LogoutInstitucionalRespuesta {
+  mensaje: string;
+  tokenRevocado: boolean;
+  marcaTemporal: string;
+}
+
+export interface SesionActualRespuesta {
+  idInstitucion: string;
+  correoInstitucional: string;
+  razonSocial: string;
+  rol: string;
+  codigoPlan: string;
+  estadoSuscripcion: string;
+  expiraEnSegundosRestantes: number;
+  activo: boolean;
 }

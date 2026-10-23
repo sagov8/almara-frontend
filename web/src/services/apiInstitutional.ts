@@ -3,6 +3,10 @@ import {
   RegistroInstitucionalRespuesta,
   VerificacionCorreoSolicitud,
   VerificacionCorreoRespuesta,
+  LoginInstitucionalSolicitud,
+  LoginInstitucionalRespuesta,
+  LogoutInstitucionalRespuesta,
+  SesionActualRespuesta,
   ErrorApi,
 } from '../types/institutional';
 
@@ -50,3 +54,42 @@ export async function verificarCorreoInstitucion(
   });
   return manejarRespuesta<VerificacionCorreoRespuesta>(respuesta);
 }
+
+export async function iniciarSesionInstitucion(
+  solicitud: LoginInstitucionalSolicitud
+): Promise<LoginInstitucionalRespuesta> {
+  const respuesta = await fetch(`${API_BASE_URL}/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(solicitud),
+  });
+  return manejarRespuesta<LoginInstitucionalRespuesta>(respuesta);
+}
+
+export async function cerrarSesionInstitucion(
+  tokenAcceso: string
+): Promise<LogoutInstitucionalRespuesta> {
+  const respuesta = await fetch(`${API_BASE_URL}/logout`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${tokenAcceso}`,
+    },
+  });
+  return manejarRespuesta<LogoutInstitucionalRespuesta>(respuesta);
+}
+
+export async function obtenerSesionActual(
+  tokenAcceso: string
+): Promise<SesionActualRespuesta> {
+  const respuesta = await fetch(`${API_BASE_URL}/sesion-actual`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${tokenAcceso}`,
+    },
+  });
+  return manejarRespuesta<SesionActualRespuesta>(respuesta);
+}
+

@@ -11,6 +11,13 @@ import {
   EstadoSuscripcionRespuesta,
   AdquirirPlanSolicitud,
   OrdenSuscripcionRespuesta,
+  ProcesarPagoSolicitud,
+  PagoSuscripcionRespuesta,
+  VerificarModuloRespuesta,
+  MatrizPermisosRespuesta,
+  DashboardInstitucionalResumenRespuesta,
+  FiltroTerritorialDashboardRespuesta,
+  ReporteAnaliticoExportacionRespuesta,
   ErrorApi,
 } from '../types/institutional';
 
@@ -18,6 +25,9 @@ const API_AUTH_URL = '/api/v1/institutional/auth';
 const API_PLANES_URL = '/api/v1/institutional/planes';
 const API_SUSCRIPCIONES_URL = '/api/v1/institutional/suscripciones';
 const API_CHECKOUT_URL = '/api/v1/institutional/checkout';
+const API_PAGOS_URL = '/api/v1/institutional/pagos';
+const API_PERMISOS_URL = '/api/v1/institutional/permisos';
+const API_DASHBOARD_URL = '/api/v1/institutional/dashboard';
 
 async function manejarRespuesta<T>(respuesta: Response): Promise<T> {
   if (!respuesta.ok) {
@@ -153,5 +163,118 @@ export async function consultarOrdenPorId(
   });
   return manejarRespuesta<OrdenSuscripcionRespuesta>(respuesta);
 }
+
+export async function procesarPagoSuscripcion(
+  solicitud: ProcesarPagoSolicitud,
+  tokenAcceso: string
+): Promise<PagoSuscripcionRespuesta> {
+  const respuesta = await fetch(`${API_PAGOS_URL}/procesar`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${tokenAcceso}`,
+    },
+    body: JSON.stringify(solicitud),
+  });
+  return manejarRespuesta<PagoSuscripcionRespuesta>(respuesta);
+}
+
+export async function reintentarPagoSuscripcion(
+  solicitud: ProcesarPagoSolicitud,
+  tokenAcceso: string
+): Promise<PagoSuscripcionRespuesta> {
+  const respuesta = await fetch(`${API_PAGOS_URL}/reintentar`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${tokenAcceso}`,
+    },
+    body: JSON.stringify(solicitud),
+  });
+  return manejarRespuesta<PagoSuscripcionRespuesta>(respuesta);
+}
+
+export async function validarAccesoModulo(
+  codigoModulo: string,
+  tokenAcceso: string
+): Promise<VerificarModuloRespuesta> {
+  const respuesta = await fetch(`${API_PERMISOS_URL}/validar/${codigoModulo}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${tokenAcceso}`,
+    },
+  });
+  return manejarRespuesta<VerificarModuloRespuesta>(respuesta);
+}
+
+export async function consultarMisModulos(
+  tokenAcceso: string
+): Promise<MatrizPermisosRespuesta> {
+  const respuesta = await fetch(`${API_PERMISOS_URL}/mis-modulos`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${tokenAcceso}`,
+    },
+  });
+  return manejarRespuesta<MatrizPermisosRespuesta>(respuesta);
+}
+
+export async function consultarDashboardResumen(
+  tokenAcceso: string,
+  periodo: string = 'ULTIMAS_24_HORAS'
+): Promise<DashboardInstitucionalResumenRespuesta> {
+  const params = new URLSearchParams({ periodo });
+  const respuesta = await fetch(`${API_DASHBOARD_URL}/resumen?${params.toString()}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${tokenAcceso}`,
+    },
+  });
+  return manejarRespuesta<DashboardInstitucionalResumenRespuesta>(respuesta);
+}
+
+export async function filtrarClimaEmocionalPorZonas(
+  tokenAcceso: string,
+  filtros?: {
+    zonaManualId?: string;
+    idCeldaH3?: string;
+    emocion?: string;
+    periodo?: string;
+  }
+): Promise<FiltroTerritorialDashboardRespuesta> {
+  const query = new URLSearchParams();
+  if (filtros?.zonaManualId) query.set('zonaManualId', filtros.zonaManualId);
+  if (filtros?.idCeldaH3) query.set('idCeldaH3', filtros.idCeldaH3);
+  if (filtros?.emocion && filtros.emocion !== 'TODAS') query.set('emocion', filtros.emocion);
+  if (filtros?.periodo) query.set('periodo', filtros.periodo);
+
+  const url = `${API_DASHBOARD_URL}/filtrar-zonas${query.toString() ? `?${query.toString()}` : ''}`;
+  const respuesta = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${tokenAcceso}`,
+    },
+  });
+  return manejarRespuesta<FiltroTerritorialDashboardRespuesta>(respuesta);
+}
+
+export async function exportarReporteAnalitico(
+  tokenAcceso: string,
+  zonaManualId?: string
+): Promise<ReporteAnaliticoExportacionRespuesta> {
+  const query = new URLSearchParams();
+  if (zonaManualId) query.set('zonaManualId', zonaManualId);
+
+  const url = `${API_DASHBOARD_URL}/exportar${query.toString() ? `?${query.toString()}` : ''}`;
+  const respuesta = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${tokenAcceso}`,
+    },
+  });
+  return manejarRespuesta<ReporteAnaliticoExportacionRespuesta>(respuesta);
+}
+
+
 
 

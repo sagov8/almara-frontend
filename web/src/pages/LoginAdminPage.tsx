@@ -1,0 +1,186 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Shield, Lock, User, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
+import { loginAdmin } from '../services/apiAdmin';
+import { useAuthAdmin } from '../context/AuthAdminContext';
+import { ErrorApiAdmin } from '../types/admin';
+
+export const LoginAdminPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { guardarSesion } = useAuthAdmin();
+
+  const [usuarioAdmin, setUsuarioAdmin] = useState('');
+  const [passwordAdmin, setPasswordAdmin] = useState('');
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [estaBloqueado, setEstaBloqueado] = useState(false);
+
+  const manejarEnvio = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!usuarioAdmin.trim() || !passwordAdmin.trim()) {
+      setError('Por favor ingrese el usuario/correo y la contraseña.');
+      return;
+    }
+
+    setCargando(true);
+    setError(null);
+    setEstaBloqueado(false);
+
+    try {
+      const respuesta = await loginAdmin({
+        usuarioAdmin: usuarioAdmin.trim(),
+        passwordAdmin: passwordAdmin.trim(),
+      });
+
+      guardarSesion(respuesta);
+      navigate('/admin/dashboard');
+    } catch (err) {
+      const errorApi = err as ErrorApiAdmin;
+      if (errorApi.codigoEstado === 423 || errorApi.error === 'CUENTA_BLOQUEADA_TEMPORALMENTE') {
+        setEstaBloqueado(true);
+        setError(errorApi.mensaje || 'Cuenta administrativa temporalmente bloqueada por seguridad.');
+      } else {
+        setError(errorApi.mensaje || 'Credenciales administrativas incorrectas o cuenta no autorizada.');
+      }
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-center items-center p-4 sm:p-6 font-sans relative overflow-hidden">
+      {/* Resplandores oscuros decorativos de fondo */}
+      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div className="w-full max-w-md relative z-10">
+        {/* Cabecera / Marca Admin */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 shadow-lg shadow-amber-500/20 mb-4 border border-amber-400/20">
+            <Shield className="w-7 h-7 text-white" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Panel de Administración
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            Sistema Almara • Módulo Administrativo Global
+          </p>
+        </div>
+
+        {/* Tarjeta del Formulario */}
+        <div className="bg-slate-800/90 backdrop-blur-md border border-slate-700/80 rounded-3xl p-7 sm:p-8 shadow-2xl">
+          <div className="mb-6">
+            <h2 className="text-lg font-bold text-white">Iniciar Sesión de Administrador</h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Ingrese con sus credenciales autorizadas con rol <span className="font-semibold text-amber-400">ROLE_ADMIN</span> (HU-11).
+            </p>
+          </div>
+
+          {error && (
+            <div
+              className={`mb-5 p-4 rounded-xl border flex items-start gap-3 text-xs sm:text-sm ${
+                estaBloqueado
+                  ? 'bg-rose-950/50 border-rose-600/50 text-rose-200'
+                  : 'bg-amber-950/40 border-amber-600/50 text-amber-200'
+              }`}
+            >
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-amber-400" />
+              <div>
+                <p className="font-semibold">
+                  {estaBloqueado ? 'Acceso temporalmente suspendido' : 'Error de autenticación'}
+                </p>
+                <p className="mt-0.5 opacity-90">{error}</p>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={manejarEnvio} className="space-y-4">
+            <div>
+              <label
+                htmlFor="usuarioAdmin"
+                className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5"
+              >
+                Usuario o Correo Administrativo
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <User className="w-4 h-4" />
+                </div>
+                <input
+                  id="usuarioAdmin"
+                  type="text"
+                  value={usuarioAdmin}
+                  onChange={(e) => setUsuarioAdmin(e.target.value)}
+                  placeholder="admin@almara.com"
+                  disabled={cargando}
+                  required
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-700 bg-slate-900/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="passwordAdmin"
+                className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5"
+              >
+                Contraseña
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <Lock className="w-4 h-4" />
+                </div>
+                <input
+                  id="passwordAdmin"
+                  type="password"
+                  value={passwordAdmin}
+                  onChange={(e) => setPasswordAdmin(e.target.value)}
+                  placeholder="••••••••••••"
+                  disabled={cargando}
+                  required
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-700 bg-slate-900/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={cargando}
+              className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {cargando ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Validando credenciales...</span>
+                </>
+              ) : (
+                <>
+                  <span>Ingresar al Panel Administrativo</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Información de entorno de desarrollo */}
+          <div className="mt-6 pt-5 border-t border-slate-700/60 text-center">
+            <p className="text-xs text-slate-400">
+              Credencial preconfigurada: <code className="bg-slate-900 px-1.5 py-0.5 rounded text-amber-300 font-mono">admin@almara.com</code> / <code className="bg-slate-900 px-1.5 py-0.5 rounded text-amber-300 font-mono">Admin1234*</code>
+            </p>
+          </div>
+        </div>
+
+        {/* Enlace al mapa ciudadano o login institucional */}
+        <div className="mt-6 text-center text-xs text-slate-400 space-x-4">
+          <a href="/" className="hover:text-amber-400 transition-colors">
+            ← Volver al Mapa Público
+          </a>
+          <span>•</span>
+          <a href="/institutional/login" className="hover:text-amber-400 transition-colors">
+            Acceso Institucional
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};

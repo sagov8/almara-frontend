@@ -171,3 +171,112 @@ export interface OrdenSuscripcionRespuesta {
   lineasDetalle: LineaDetalleDto[];
   siguientePaso: string;
 }
+
+export interface ProcesarPagoSolicitud {
+  idOrden: string;
+  metodoPago: string;
+  tokenMedioPago: string;
+}
+
+export interface PagoSuscripcionRespuesta {
+  idPago: string;
+  idOrden: string;
+  numeroOrden: string;
+  referenciaExterna: string;
+  montoPagado: number;
+  metodoPago: string;
+  estadoPago: 'APROBADO' | 'RECHAZADO' | 'PENDIENTE';
+  motivoRechazo?: string;
+  pagoAprobado: boolean;
+  permiteReintento: boolean;
+  estadoOrden: 'PENDIENTE_PAGO' | 'PAGADA' | 'FALLIDA' | 'CANCELADA';
+  codigoPlanActivado?: string;
+  estadoSuscripcion?: string;
+  nuevaFechaExpiracion?: string;
+  notificacionEnviada: boolean;
+  tokenAccesoActualizado?: string;
+  mensaje: string;
+}
+
+export interface VerificarModuloRespuesta {
+  accesoPermitido: boolean;
+  codigoModulo: string;
+  codigoPlan: string;
+  estadoSuscripcion: string;
+  mensaje: string;
+}
+
+export interface MatrizPermisosRespuesta {
+  idInstitucion: string;
+  idSuscripcion: string;
+  codigoPlan: string;
+  nombrePlan: string;
+  estadoSuscripcion: string;
+  fechaExpiracion: string;
+  suscripcionVigente: boolean;
+  modulos: ModuloCatalogoDto[];
+}
+
+export interface IndicadorEmocionCiudadDto {
+  idEmocion: string;
+  nombreEmocion: string;
+  codigoHexColor: string;
+  icono: string;
+  porcentajeGlobal: number;
+}
+
+export interface ZonaTerritorialAnaliticaDto {
+  idCeldaH3: string;
+  zonaManualId?: string;
+  nombreZona: string;
+  descripcionZona?: string;
+  latitudCentroide: number;
+  longitudCentroide: number;
+  cumpleUmbral: boolean;
+  emocionPredominante?: string;
+  nombreEmocionPredominante?: string;
+  codigoHexColor?: string;
+  icono?: string;
+  intensidadPromedio: number;
+  participantesAproximados: string;
+  distribucionPorcentual?: Record<string, number>;
+  tendencia?: string;
+}
+
+export interface DashboardInstitucionalResumenRespuesta {
+  idInstitucion: string;
+  razonSocial: string;
+  codigoPlanActivo: string;
+  periodoConsultado: string;
+  totalZonasMonitoreadas: number;
+  zonasConDatosSuficientes: number;
+  zonasEnReservaPrivacidad: number;
+  emocionPredominanteCiudad: string;
+  intensidadPromedioCiudad: number;
+  distribucionGlobalCiudad: IndicadorEmocionCiudadDto[];
+  resumenZonas: ZonaTerritorialAnaliticaDto[];
+  filtroTerritorialHabilitado: boolean;
+  exportacionHabilitada: boolean;
+  tiempoCalculoMs: number;
+}
+
+export interface FiltroTerritorialDashboardRespuesta {
+  zonaFiltrada: string;
+  emocionFiltrada: string;
+  periodoConsultado: string;
+  totalZonasCoincidentes: number;
+  zonasFiltradas: ZonaTerritorialAnaliticaDto[];
+  tiempoCalculoMs: number;
+}
+
+export interface ReporteAnaliticoExportacionRespuesta {
+  idInstitucion: string;
+  razonSocial: string;
+  identificacionFiscalNit: string;
+  planSuscripcion: string;
+  formato: string;
+  fechaGeneracion: string;
+  totalZonasExportadas: number;
+  declaracionPrivacidad: string;
+  datosZonas: ZonaTerritorialAnaliticaDto[];
+}

@@ -6,6 +6,7 @@ interface ContextoAutenticacion {
   sesion: LoginInstitucionalRespuesta | null;
   autenticado: boolean;
   guardarSesion: (datos: LoginInstitucionalRespuesta) => void;
+  actualizarTokenAcceso: (nuevoToken: string, nuevoPlan?: string) => void;
   cerrarSesion: () => Promise<void>;
 }
 
@@ -35,6 +36,18 @@ export const AuthInstitutionalProvider: React.FC<{ children: React.ReactNode }> 
     setSesion(datos);
   }, []);
 
+  const actualizarTokenAcceso = useCallback((nuevoToken: string, nuevoPlan?: string) => {
+    setSesion((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        tokenAcceso: nuevoToken,
+        codigoPlan: nuevoPlan || prev.codigoPlan,
+        estadoSuscripcion: 'ACTIVA',
+      };
+    });
+  }, []);
+
   const cerrarSesion = useCallback(async () => {
     const tokenActual = sesion?.tokenAcceso;
     try {
@@ -56,6 +69,7 @@ export const AuthInstitutionalProvider: React.FC<{ children: React.ReactNode }> 
         sesion,
         autenticado: !!sesion?.tokenAcceso,
         guardarSesion,
+        actualizarTokenAcceso,
         cerrarSesion,
       }}
     >

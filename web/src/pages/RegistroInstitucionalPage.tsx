@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Loader2, CheckCircle2 } from 'lucide-react';
 import {
   registrarInstitucion,
   verificarCorreoInstitucion,
@@ -31,6 +32,7 @@ export const RegistroInstitucionalPage: React.FC = () => {
   });
 
   const [cargando, setCargando] = useState(false);
+  const [faseRegistro, setFaseRegistro] = useState('Registrando entidad institucional...');
   const [error, setError] = useState<string | null>(null);
   const [registroExitoso, setRegistroExitoso] = useState<RegistroInstitucionalRespuesta | null>(null);
 
@@ -73,17 +75,23 @@ export const RegistroInstitucionalPage: React.FC = () => {
 
     setCargando(true);
     setError(null);
+    setFaseRegistro('Validando datos y enviando código de verificación por correo...');
+
+    const timerFase = setTimeout(() => {
+      setFaseRegistro('Despachando código OTP al correo corporativo vía SMTP...');
+    }, 1200);
 
     try {
       const respuesta = await registrarInstitucion(formulario);
       setRegistroExitoso(respuesta);
-      if (respuesta.tokenVerificacionSimulado) {
-        setTokenVerificacion(respuesta.tokenVerificacionSimulado);
-      }
+      // El código de verificación ha sido despachado por correo electrónico.
+      // Mantenemos el campo vacío para que el usuario ingrese el código recibido.
+      setTokenVerificacion('');
     } catch (err) {
       const errorApi = err as ErrorApi;
       setError(errorApi.mensaje || 'Ocurrió un error al procesar el registro institucional.');
     } finally {
+      clearTimeout(timerFase);
       setCargando(false);
     }
   };
@@ -107,38 +115,38 @@ export const RegistroInstitucionalPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 sm:p-6 font-sans relative overflow-hidden selection:bg-sky-500 selection:text-white">
-      {/* Luces de fondo */}
-      <div className="absolute top-10 -left-20 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-10 -right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-4 sm:p-6 font-sans relative overflow-hidden selection:bg-sky-500 selection:text-white">
+      {/* Luces de fondo decorativas sutiles */}
+      <div className="absolute top-10 -left-20 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-10 -right-20 w-96 h-96 bg-indigo-200/40 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="w-full max-w-2xl relative z-10 my-8">
         {/* Cabecera */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 shadow-xl shadow-sky-500/25 mb-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 shadow-lg shadow-sky-500/20 mb-4">
             <span className="text-white font-extrabold text-2xl">A</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
             Almara Institucional
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-slate-500 mt-1">
             Registro Oficial de Entidades Gubernamentales, Educativas y Corporativas
           </p>
         </div>
 
         {/* Tarjeta Principal */}
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-7 sm:p-10 shadow-2xl backdrop-blur-md">
+        <div className="bg-white border border-slate-200 rounded-3xl p-7 sm:p-10 shadow-xl">
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-rose-950/50 border border-rose-500/40 text-rose-200 text-xs flex items-start space-x-2.5">
+            <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start space-x-2.5">
               <span className="text-base flex-shrink-0">⚠️</span>
-              <p className="flex-1">{error}</p>
+              <p className="flex-1 font-medium">{error}</p>
             </div>
           )}
 
           {!registroExitoso ? (
             <form onSubmit={manejarEnvio} className="space-y-6">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">
                   Razón Social / Nombre Oficial de la Entidad *
                 </label>
                 <input
@@ -148,13 +156,13 @@ export const RegistroInstitucionalPage: React.FC = () => {
                   onChange={manejarCambio}
                   placeholder="Ej. Alcaldía Municipal de Popayán"
                   required
-                  className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">
                     NIT o Identificación Fiscal *
                   </label>
                   <input
@@ -164,19 +172,19 @@ export const RegistroInstitucionalPage: React.FC = () => {
                     onChange={manejarCambio}
                     placeholder="Ej. 891500761-4"
                     required
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">
                     Sector de Actividad *
                   </label>
                   <select
                     name="sectorActividad"
                     value={formulario.sectorActividad}
                     onChange={manejarCambio}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition cursor-pointer"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition cursor-pointer"
                   >
                     <option value="GOBIERNO">Gobierno y Entidades Públicas</option>
                     <option value="EDUCACION">Educación e Investigación</option>
@@ -188,7 +196,7 @@ export const RegistroInstitucionalPage: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">
                     Nombre del Representante o Contacto *
                   </label>
                   <input
@@ -198,12 +206,12 @@ export const RegistroInstitucionalPage: React.FC = () => {
                     onChange={manejarCambio}
                     placeholder="Ej. Dra. Martha Lucía Gómez"
                     required
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">
                     Teléfono Corporativo (Opcional)
                   </label>
                   <input
@@ -212,13 +220,13 @@ export const RegistroInstitucionalPage: React.FC = () => {
                     value={formulario.telefonoContacto}
                     onChange={manejarCambio}
                     placeholder="Ej. +57 (602) 820 0000"
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">
                   Correo Corporativo / Institucional *
                 </label>
                 <input
@@ -228,10 +236,10 @@ export const RegistroInstitucionalPage: React.FC = () => {
                   onChange={manejarCambio}
                   placeholder="Ej. contacto@popayan.gov.co"
                   required
-                  className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
                 />
                 {esDominioProhibido && (
-                  <p className="text-xs text-amber-400 mt-1.5 flex items-center space-x-1">
+                  <p className="text-xs text-amber-700 mt-1.5 flex items-center space-x-1 font-medium">
                     <span>⚠️</span>
                     <span>No se admiten dominios personales ({dominio}). Utilice el dominio oficial de su institución.</span>
                   </p>
@@ -239,7 +247,7 @@ export const RegistroInstitucionalPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">
                   Contraseña de Acceso *
                 </label>
                 <input
@@ -249,87 +257,139 @@ export const RegistroInstitucionalPage: React.FC = () => {
                   onChange={manejarCambio}
                   placeholder="••••••••••••"
                   required
-                  className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
                 />
 
                 {/* Checklist de Requisitos de Contraseña */}
                 <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
-                  <span className={tieneMinimo8 ? 'text-emerald-400' : 'text-slate-500'}>
+                  <span className={tieneMinimo8 ? 'text-emerald-600 font-semibold' : 'text-slate-400'}>
                     {tieneMinimo8 ? '✓' : '○'} Mínimo 8 caracteres
                   </span>
-                  <span className={tieneMayuscula ? 'text-emerald-400' : 'text-slate-500'}>
+                  <span className={tieneMayuscula ? 'text-emerald-600 font-semibold' : 'text-slate-400'}>
                     {tieneMayuscula ? '✓' : '○'} Una mayúscula
                   </span>
-                  <span className={tieneMinuscula ? 'text-emerald-400' : 'text-slate-500'}>
+                  <span className={tieneMinuscula ? 'text-emerald-600 font-semibold' : 'text-slate-400'}>
                     {tieneMinuscula ? '✓' : '○'} Una minúscula
                   </span>
-                  <span className={tieneNumero ? 'text-emerald-400' : 'text-slate-500'}>
+                  <span className={tieneNumero ? 'text-emerald-600 font-semibold' : 'text-slate-400'}>
                     {tieneNumero ? '✓' : '○'} Un número
                   </span>
-                  <span className={tieneSimbolo ? 'text-emerald-400' : 'text-slate-500'}>
+                  <span className={tieneSimbolo ? 'text-emerald-600 font-semibold' : 'text-slate-400'}>
                     {tieneSimbolo ? '✓' : '○'} Carácter especial (@$!%*?)
                   </span>
                 </div>
               </div>
 
               <button
+                id="btn-registro-submit"
                 type="submit"
                 disabled={cargando || esDominioProhibido || !passwordValido}
-                className="w-full py-3.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-sky-500 via-sky-600 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white shadow-lg shadow-sky-500/25 transition-all focus:outline-none focus:ring-2 focus:ring-sky-400 disabled:opacity-50 cursor-pointer"
+                aria-busy={cargando}
+                className="w-full py-3.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-sky-600 via-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white shadow-lg shadow-sky-500/20 transition-all focus:outline-none focus:ring-2 focus:ring-sky-400 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
               >
-                {cargando ? 'Procesando registro...' : 'Registrar Entidad Institucional'}
+                {cargando ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+                    <span className="truncate">{faseRegistro}</span>
+                  </>
+                ) : (
+                  'Registrar Entidad Institucional'
+                )}
               </button>
             </form>
           ) : (
             /* Pantalla de Confirmación y Verificación de Correo */
             <div className="text-center space-y-6">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-3xl mx-auto">
-                ✓
+              <div className="w-16 h-16 rounded-full bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center text-3xl mx-auto shadow-sm">
+                ✉️
               </div>
 
               <div>
-                <h3 className="text-xl font-bold text-white">¡Registro Exitoso!</h3>
-                <p className="text-xs sm:text-sm text-slate-300 mt-2">
-                  Se ha enviado un enlace de confirmación al correo institucional registrado (
-                  <span className="font-semibold text-sky-400">{formulario.correoCorporativo}</span>).
+                <span className="inline-block px-3 py-1 bg-sky-100 text-sky-800 text-[11px] font-semibold rounded-full mb-2">
+                  Paso Final: Verificación Institucional
+                </span>
+                <h3 className="text-xl font-bold text-slate-900">Código de Verificación Enviado</h3>
+                <p className="text-xs sm:text-sm text-slate-600 mt-2 max-w-lg mx-auto">
+                  Hemos enviado un correo electrónico con su código de verificación a{' '}
+                  <span className="font-semibold text-slate-900">{formulario.correoCorporativo}</span>.
+                  Revise su bandeja de entrada (y la carpeta de spam o correo no deseado) e ingrese el código a continuación para validar y activar su cuenta.
                 </p>
               </div>
 
-              {/* Caja de Verificación Demo */}
-              <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-6 text-left space-y-4">
+              {/* Caja de Verificación */}
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-left space-y-4">
                 <div>
-                  <h4 className="text-xs uppercase tracking-wider font-bold text-sky-400">
-                    Activación Inmediata de Cuenta
-                  </h4>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Ingrese el token de verificación simulado emitido por el sistema para activar su cuenta y asignar automáticamente el Plan Básico Gratuito:
+                  <label className="block text-xs uppercase tracking-wider font-bold text-slate-700 mb-2">
+                    Código de Validación (OTP) *
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={36}
+                    disabled={verificando || cuentaActivada}
+                    value={tokenVerificacion}
+                    onChange={(e) => setTokenVerificacion(e.target.value.trim())}
+                    placeholder="Ej. 123456"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-center text-xl font-bold tracking-widest focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition placeholder-slate-300 disabled:opacity-60"
+                    autoFocus
+                  />
+                  <p className="text-[11px] text-slate-500 mt-1.5">
+                    Ingrese el código numérico de 6 dígitos que recibió por correo.
                   </p>
                 </div>
 
-                <input
-                  type="text"
-                  value={tokenVerificacion}
-                  onChange={(e) => setTokenVerificacion(e.target.value)}
-                  placeholder="Token de verificación"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sky-300 font-mono text-xs focus:outline-none focus:border-sky-500"
-                />
-
                 <button
+                  id="btn-verificar-codigo"
+                  type="button"
                   onClick={manejarVerificacion}
-                  disabled={verificando || cuentaActivada}
-                  className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-900 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition cursor-pointer"
+                  disabled={verificando || cuentaActivada || !tokenVerificacion.trim()}
+                  aria-busy={verificando}
+                  className={`w-full py-3 px-4 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition shadow-sm flex items-center justify-center gap-2 ${
+                    verificando
+                      ? 'bg-emerald-600 opacity-80 cursor-wait'
+                      : cuentaActivada
+                      ? 'bg-emerald-600 cursor-default'
+                      : 'bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed cursor-pointer'
+                  }`}
                 >
-                  {verificando ? 'Verificando...' : cuentaActivada ? '✓ Cuenta Activada' : 'Verificar y Activar Cuenta'}
+                  {verificando ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+                      <span>Validando código y activando cuenta...</span>
+                    </>
+                  ) : cuentaActivada ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                      <span>Cuenta Activada</span>
+                    </>
+                  ) : (
+                    <span>Validar Código y Activar Cuenta</span>
+                  )}
                 </button>
 
+                {registroExitoso?.tokenVerificacionSimulado && (
+                  <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px] text-slate-400">
+                    <span>¿Prueba en entorno local?</span>
+                    <button
+                      type="button"
+                      onClick={() => setTokenVerificacion(registroExitoso.tokenVerificacionSimulado || '')}
+                      className="text-sky-600 font-medium hover:underline hover:text-sky-700"
+                    >
+                      Autocompletar código de prueba
+                    </button>
+                  </div>
+                )}
+
                 {cuentaActivada && (
-                  <div className="p-4 rounded-xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-200 text-xs text-center space-y-3">
-                    <p>🎉 Su cuenta ha sido activada con éxito. Ya puede iniciar sesión con sus credenciales.</p>
+                  <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs text-center space-y-3">
+                    <p className="font-semibold text-sm">🎉 ¡Cuenta institucional activada con éxito!</p>
+                    <p className="text-emerald-700">
+                      Su correo corporativo ha sido verificado satisfactoriamente y se ha asignado el Plan Institucional Base. Ya puede acceder con sus credenciales.
+                    </p>
                     <Link
                       to="/institutional/login"
-                      className="inline-block px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs"
+                      className="inline-block px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-sm transition"
                     >
-                      Ir al Inicio de Sesión →
+                      Continuar al Inicio de Sesión →
                     </Link>
                   </div>
                 )}
@@ -338,10 +398,10 @@ export const RegistroInstitucionalPage: React.FC = () => {
           )}
 
           {/* Enlaces de pie */}
-          <div className="mt-8 pt-6 border-t border-slate-800/80 text-center">
-            <p className="text-xs text-slate-400">
+          <div className="mt-8 pt-6 border-t border-slate-100 text-center">
+            <p className="text-xs text-slate-600">
               ¿Ya tiene una cuenta institucional registrada?{' '}
-              <Link to="/institutional/login" className="font-semibold text-sky-400 hover:text-sky-300">
+              <Link to="/institutional/login" className="font-bold text-sky-600 hover:text-sky-700">
                 Iniciar Sesión
               </Link>
             </p>

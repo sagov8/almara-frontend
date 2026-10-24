@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   registrarInstitucion,
   verificarCorreoInstitucion,
@@ -33,7 +34,6 @@ export const RegistroInstitucionalPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [registroExitoso, setRegistroExitoso] = useState<RegistroInstitucionalRespuesta | null>(null);
 
-  // Estado para el modal/campo de verificación rápida demo
   const [tokenVerificacion, setTokenVerificacion] = useState('');
   const [verificando, setVerificando] = useState(false);
   const [cuentaActivada, setCuentaActivada] = useState(false);
@@ -63,11 +63,11 @@ export const RegistroInstitucionalPage: React.FC = () => {
   const manejarEnvio = async (e: React.FormEvent) => {
     e.preventDefault();
     if (esDominioProhibido) {
-      setError(`No se permiten correos de dominios públicos gratuitos (${dominio}). Utilice el dominio corporativo o gubernamental de su entidad.`);
+      setError(`No se permiten correos de dominios públicos (${dominio}). Utilice el dominio corporativo o institucional oficial.`);
       return;
     }
     if (!passwordValido) {
-      setError('La contraseña no cumple con todos los requisitos de seguridad requeridos.');
+      setError('La contraseña no cumple con todos los requisitos de seguridad obligatorios.');
       return;
     }
 
@@ -90,7 +90,7 @@ export const RegistroInstitucionalPage: React.FC = () => {
 
   const manejarVerificacion = async () => {
     if (!tokenVerificacion.trim()) {
-      setError('Por favor ingrese el token de verificación recibido.');
+      setError('Por favor ingrese el token de verificación.');
       return;
     }
     setVerificando(true);
@@ -107,361 +107,247 @@ export const RegistroInstitucionalPage: React.FC = () => {
   };
 
   return (
-    <div style={estilos.contenedor}>
-      <div style={estilos.tarjeta}>
-        <div style={estilos.encabezado}>
-          <h1 style={estilos.titulo}>Almara Institucional</h1>
-          <p style={estilos.subtitulo}>
-            Registro de Entidades Públicas, Universidades y Empresas
+    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 sm:p-6 font-sans relative overflow-hidden selection:bg-sky-500 selection:text-white">
+      {/* Luces de fondo */}
+      <div className="absolute top-10 -left-20 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-10 -right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div className="w-full max-w-2xl relative z-10 my-8">
+        {/* Cabecera */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 shadow-xl shadow-sky-500/25 mb-4">
+            <span className="text-white font-extrabold text-2xl">A</span>
+          </div>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">
+            Almara Institucional
+          </h1>
+          <p className="text-sm text-slate-400 mt-1">
+            Registro Oficial de Entidades Gubernamentales, Educativas y Corporativas
           </p>
         </div>
 
-        {error && <div style={estilos.alertaError}>{error}</div>}
-
-        {!registroExitoso ? (
-          <form onSubmit={manejarEnvio} style={estilos.formulario}>
-            <div style={estilos.grupo}>
-              <label style={estilos.etiqueta}>Razón Social / Nombre de la Entidad *</label>
-              <input
-                type="text"
-                name="razonSocial"
-                value={formulario.razonSocial}
-                onChange={manejarCambio}
-                placeholder="Ej. Alcaldía Municipal de Popayán"
-                required
-                style={estilos.input}
-              />
+        {/* Tarjeta Principal */}
+        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-7 sm:p-10 shadow-2xl backdrop-blur-md">
+          {error && (
+            <div className="mb-6 p-4 rounded-xl bg-rose-950/50 border border-rose-500/40 text-rose-200 text-xs flex items-start space-x-2.5">
+              <span className="text-base flex-shrink-0">⚠️</span>
+              <p className="flex-1">{error}</p>
             </div>
+          )}
 
-            <div style={estilos.fila}>
-              <div style={estilos.grupoFila}>
-                <label style={estilos.etiqueta}>NIT o Identificación Fiscal *</label>
+          {!registroExitoso ? (
+            <form onSubmit={manejarEnvio} className="space-y-6">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                  Razón Social / Nombre Oficial de la Entidad *
+                </label>
                 <input
                   type="text"
-                  name="identificacionFiscalNit"
-                  value={formulario.identificacionFiscalNit}
+                  name="razonSocial"
+                  value={formulario.razonSocial}
                   onChange={manejarCambio}
-                  placeholder="Ej. 891500761-4"
+                  placeholder="Ej. Alcaldía Municipal de Popayán"
                   required
-                  style={estilos.input}
+                  className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
                 />
               </div>
 
-              <div style={estilos.grupoFila}>
-                <label style={estilos.etiqueta}>Sector de Actividad</label>
-                <select
-                  name="sectorActividad"
-                  value={formulario.sectorActividad}
-                  onChange={manejarCambio}
-                  style={estilos.select}
-                >
-                  <option value="GOBIERNO">Gobierno / Alcaldía</option>
-                  <option value="EDUCACION">Educación / Universidad</option>
-                  <option value="EVENTOS">Eventos / Cultura</option>
-                  <option value="PRIVADO">Sector Privado / Empresa</option>
-                </select>
-              </div>
-            </div>
-
-            <div style={estilos.fila}>
-              <div style={estilos.grupoFila}>
-                <label style={estilos.etiqueta}>Nombre del Contacto Directo *</label>
-                <input
-                  type="text"
-                  name="nombreContacto"
-                  value={formulario.nombreContacto}
-                  onChange={manejarCambio}
-                  placeholder="Ej. Dra. María Pérez"
-                  required
-                  style={estilos.input}
-                />
-              </div>
-
-              <div style={estilos.grupoFila}>
-                <label style={estilos.etiqueta}>Teléfono de Contacto</label>
-                <input
-                  type="tel"
-                  name="telefonoContacto"
-                  value={formulario.telefonoContacto}
-                  onChange={manejarCambio}
-                  placeholder="Ej. 3101234567"
-                  style={estilos.input}
-                />
-              </div>
-            </div>
-
-            <div style={estilos.grupo}>
-              <label style={estilos.etiqueta}>Correo Corporativo / Institucional *</label>
-              <input
-                type="email"
-                name="correoCorporativo"
-                value={formulario.correoCorporativo}
-                onChange={manejarCambio}
-                placeholder="Ej. contacto@popayan.gov.co"
-                required
-                style={estilos.input}
-              />
-              {esDominioProhibido && (
-                <span style={estilos.textoAdvertencia}>
-                  ⚠️ Ingrese un correo con dominio corporativo de su institución (no @{dominio}).
-                </span>
-              )}
-            </div>
-
-            <div style={estilos.grupo}>
-              <label style={estilos.etiqueta}>Contraseña Segura *</label>
-              <input
-                type="password"
-                name="password"
-                value={formulario.password}
-                onChange={manejarCambio}
-                placeholder="Mínimo 8 caracteres con mayúscula, número y símbolo"
-                required
-                style={estilos.input}
-              />
-              <div style={estilos.reglasPassword}>
-                <span style={tieneMinimo8 ? estilos.reglaOk : estilos.reglaPendiente}>
-                  {tieneMinimo8 ? '✓' : '○'} Mínimo 8 caracteres
-                </span>
-                <span style={tieneMayuscula ? estilos.reglaOk : estilos.reglaPendiente}>
-                  {tieneMayuscula ? '✓' : '○'} Una mayúscula
-                </span>
-                <span style={tieneNumero ? estilos.reglaOk : estilos.reglaPendiente}>
-                  {tieneNumero ? '✓' : '○'} Un número
-                </span>
-                <span style={tieneSimbolo ? estilos.reglaOk : estilos.reglaPendiente}>
-                  {tieneSimbolo ? '✓' : '○'} Un carácter especial
-                </span>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={cargando || esDominioProhibido || !passwordValido}
-              style={{
-                ...estilos.botonPrimario,
-                opacity: cargando || esDominioProhibido || !passwordValido ? 0.6 : 1,
-              }}
-            >
-              {cargando ? 'Registrando entidad...' : 'Registrar Cuenta Institucional'}
-            </button>
-          </form>
-        ) : (
-          <div style={estilos.cajaExito}>
-            <h2 style={estilos.tituloExito}>¡Solicitud de Registro Enviada!</h2>
-            <p style={estilos.textoExito}>{registroExitoso.mensaje}</p>
-
-            <div style={estilos.tarjetaVerificacion}>
-              <h3 style={estilos.subtituloVerificacion}>Verificación Inmediata de Correo (Modo Demo)</h3>
-              <p style={estilos.instruccionVerificacion}>
-                Hemos despachado un token a <strong>{registroExitoso.correoCorporativo}</strong>. En este entorno de desarrollo, el token simulado ya se encuentra prellenado:
-              </p>
-              <input
-                type="text"
-                value={tokenVerificacion}
-                onChange={(e) => setTokenVerificacion(e.target.value)}
-                placeholder="Token de verificación UUID"
-                style={estilos.inputToken}
-              />
-              <button
-                type="button"
-                onClick={manejarVerificacion}
-                disabled={verificando || cuentaActivada}
-                style={estilos.botonVerificar}
-              >
-                {verificando ? 'Verificando...' : cuentaActivada ? '✓ Cuenta Activada con Plan Free' : 'Verificar y Activar Cuenta Ahora'}
-              </button>
-
-              {cuentaActivada && (
-                <div style={estilos.alertaActivada}>
-                  🎉 ¡Cuenta activada con éxito con <strong>Plan Institucional Básico (Freemium)</strong>! Ahora puede iniciar sesión con sus credenciales.
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                    NIT o Identificación Fiscal *
+                  </label>
+                  <input
+                    type="text"
+                    name="identificacionFiscalNit"
+                    value={formulario.identificacionFiscalNit}
+                    onChange={manejarCambio}
+                    placeholder="Ej. 891500761-4"
+                    required
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
+                  />
                 </div>
-              )}
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                    Sector de Actividad *
+                  </label>
+                  <select
+                    name="sectorActividad"
+                    value={formulario.sectorActividad}
+                    onChange={manejarCambio}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition cursor-pointer"
+                  >
+                    <option value="GOBIERNO">Gobierno y Entidades Públicas</option>
+                    <option value="EDUCACION">Educación e Investigación</option>
+                    <option value="EVENTOS">Gestión de Eventos y Cultura</option>
+                    <option value="PRIVADO">Sector Privado y Servicios</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                    Nombre del Representante o Contacto *
+                  </label>
+                  <input
+                    type="text"
+                    name="nombreContacto"
+                    value={formulario.nombreContacto}
+                    onChange={manejarCambio}
+                    placeholder="Ej. Dra. Martha Lucía Gómez"
+                    required
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                    Teléfono Corporativo (Opcional)
+                  </label>
+                  <input
+                    type="tel"
+                    name="telefonoContacto"
+                    value={formulario.telefonoContacto}
+                    onChange={manejarCambio}
+                    placeholder="Ej. +57 (602) 820 0000"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                  Correo Corporativo / Institucional *
+                </label>
+                <input
+                  type="email"
+                  name="correoCorporativo"
+                  value={formulario.correoCorporativo}
+                  onChange={manejarCambio}
+                  placeholder="Ej. contacto@popayan.gov.co"
+                  required
+                  className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
+                />
+                {esDominioProhibido && (
+                  <p className="text-xs text-amber-400 mt-1.5 flex items-center space-x-1">
+                    <span>⚠️</span>
+                    <span>No se admiten dominios personales ({dominio}). Utilice el dominio oficial de su institución.</span>
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                  Contraseña de Acceso *
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  value={formulario.password}
+                  onChange={manejarCambio}
+                  placeholder="••••••••••••"
+                  required
+                  className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
+                />
+
+                {/* Checklist de Requisitos de Contraseña */}
+                <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
+                  <span className={tieneMinimo8 ? 'text-emerald-400' : 'text-slate-500'}>
+                    {tieneMinimo8 ? '✓' : '○'} Mínimo 8 caracteres
+                  </span>
+                  <span className={tieneMayuscula ? 'text-emerald-400' : 'text-slate-500'}>
+                    {tieneMayuscula ? '✓' : '○'} Una mayúscula
+                  </span>
+                  <span className={tieneMinuscula ? 'text-emerald-400' : 'text-slate-500'}>
+                    {tieneMinuscula ? '✓' : '○'} Una minúscula
+                  </span>
+                  <span className={tieneNumero ? 'text-emerald-400' : 'text-slate-500'}>
+                    {tieneNumero ? '✓' : '○'} Un número
+                  </span>
+                  <span className={tieneSimbolo ? 'text-emerald-400' : 'text-slate-500'}>
+                    {tieneSimbolo ? '✓' : '○'} Carácter especial (@$!%*?)
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={cargando || esDominioProhibido || !passwordValido}
+                className="w-full py-3.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-sky-500 via-sky-600 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white shadow-lg shadow-sky-500/25 transition-all focus:outline-none focus:ring-2 focus:ring-sky-400 disabled:opacity-50 cursor-pointer"
+              >
+                {cargando ? 'Procesando registro...' : 'Registrar Entidad Institucional'}
+              </button>
+            </form>
+          ) : (
+            /* Pantalla de Confirmación y Verificación de Correo */
+            <div className="text-center space-y-6">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-3xl mx-auto">
+                ✓
+              </div>
+
+              <div>
+                <h3 className="text-xl font-bold text-white">¡Registro Exitoso!</h3>
+                <p className="text-xs sm:text-sm text-slate-300 mt-2">
+                  Se ha enviado un enlace de confirmación al correo institucional registrado (
+                  <span className="font-semibold text-sky-400">{formulario.correoCorporativo}</span>).
+                </p>
+              </div>
+
+              {/* Caja de Verificación Demo */}
+              <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-6 text-left space-y-4">
+                <div>
+                  <h4 className="text-xs uppercase tracking-wider font-bold text-sky-400">
+                    Activación Inmediata de Cuenta
+                  </h4>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Ingrese el token de verificación simulado emitido por el sistema para activar su cuenta y asignar automáticamente el Plan Básico Gratuito:
+                  </p>
+                </div>
+
+                <input
+                  type="text"
+                  value={tokenVerificacion}
+                  onChange={(e) => setTokenVerificacion(e.target.value)}
+                  placeholder="Token de verificación"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sky-300 font-mono text-xs focus:outline-none focus:border-sky-500"
+                />
+
+                <button
+                  onClick={manejarVerificacion}
+                  disabled={verificando || cuentaActivada}
+                  className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-900 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition cursor-pointer"
+                >
+                  {verificando ? 'Verificando...' : cuentaActivada ? '✓ Cuenta Activada' : 'Verificar y Activar Cuenta'}
+                </button>
+
+                {cuentaActivada && (
+                  <div className="p-4 rounded-xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-200 text-xs text-center space-y-3">
+                    <p>🎉 Su cuenta ha sido activada con éxito. Ya puede iniciar sesión con sus credenciales.</p>
+                    <Link
+                      to="/institutional/login"
+                      className="inline-block px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs"
+                    >
+                      Ir al Inicio de Sesión →
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
+          )}
+
+          {/* Enlaces de pie */}
+          <div className="mt-8 pt-6 border-t border-slate-800/80 text-center">
+            <p className="text-xs text-slate-400">
+              ¿Ya tiene una cuenta institucional registrada?{' '}
+              <Link to="/institutional/login" className="font-semibold text-sky-400 hover:text-sky-300">
+                Iniciar Sesión
+              </Link>
+            </p>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
-};
-
-const estilos: Record<string, React.CSSProperties> = {
-  contenedor: {
-    minHeight: '100vh',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#0F172A',
-    padding: '24px',
-    fontFamily: 'Segoe UI, Arial, sans-serif',
-  },
-  tarjeta: {
-    backgroundColor: '#1E293B',
-    borderRadius: '12px',
-    padding: '32px',
-    width: '100%',
-    maxWidth: '640px',
-    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)',
-    color: '#F8FAFC',
-  },
-  encabezado: {
-    marginBottom: '24px',
-    textAlign: 'center',
-  },
-  titulo: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    color: '#38BDF8',
-    margin: '0 0 8px 0',
-  },
-  subtitulo: {
-    fontSize: '14px',
-    color: '#94A3B8',
-    margin: 0,
-  },
-  formulario: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
-  fila: {
-    display: 'flex',
-    gap: '16px',
-  },
-  grupo: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-  },
-  grupoFila: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-  },
-  etiqueta: {
-    fontSize: '13px',
-    fontWeight: 600,
-    color: '#CBD5E1',
-  },
-  input: {
-    padding: '10px 14px',
-    borderRadius: '6px',
-    border: '1px solid #334155',
-    backgroundColor: '#0F172A',
-    color: '#F8FAFC',
-    fontSize: '14px',
-    outline: 'none',
-  },
-  select: {
-    padding: '10px 14px',
-    borderRadius: '6px',
-    border: '1px solid #334155',
-    backgroundColor: '#0F172A',
-    color: '#F8FAFC',
-    fontSize: '14px',
-    outline: 'none',
-  },
-  textoAdvertencia: {
-    color: '#F59E0B',
-    fontSize: '12px',
-    marginTop: '4px',
-  },
-  reglasPassword: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '8px',
-    marginTop: '6px',
-  },
-  reglaOk: {
-    fontSize: '11px',
-    color: '#10B981',
-  },
-  reglaPendiente: {
-    fontSize: '11px',
-    color: '#64748B',
-  },
-  botonPrimario: {
-    marginTop: '12px',
-    padding: '12px',
-    backgroundColor: '#0284C7',
-    color: '#FFFFFF',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '15px',
-    fontWeight: 600,
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
-  },
-  alertaError: {
-    backgroundColor: 'rgba(239, 68, 68, 0.2)',
-    border: '1px solid #EF4444',
-    color: '#FCA5A5',
-    padding: '12px',
-    borderRadius: '6px',
-    fontSize: '13px',
-    marginBottom: '16px',
-  },
-  cajaExito: {
-    textAlign: 'center',
-  },
-  tituloExito: {
-    color: '#10B981',
-    fontSize: '20px',
-    margin: '0 0 8px 0',
-  },
-  textoExito: {
-    color: '#CBD5E1',
-    fontSize: '14px',
-    marginBottom: '20px',
-  },
-  tarjetaVerificacion: {
-    backgroundColor: '#0F172A',
-    border: '1px solid #334155',
-    borderRadius: '8px',
-    padding: '16px',
-    textAlign: 'left',
-  },
-  subtituloVerificacion: {
-    fontSize: '15px',
-    color: '#38BDF8',
-    margin: '0 0 8px 0',
-  },
-  instruccionVerificacion: {
-    fontSize: '13px',
-    color: '#94A3B8',
-    marginBottom: '12px',
-  },
-  inputToken: {
-    width: '100%',
-    padding: '10px',
-    borderRadius: '6px',
-    border: '1px solid #475569',
-    backgroundColor: '#1E293B',
-    color: '#38BDF8',
-    fontFamily: 'monospace',
-    fontSize: '13px',
-    boxSizing: 'border-box',
-    marginBottom: '12px',
-  },
-  botonVerificar: {
-    width: '100%',
-    padding: '10px',
-    backgroundColor: '#10B981',
-    color: '#FFFFFF',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '14px',
-    fontWeight: 600,
-    cursor: 'pointer',
-  },
-  alertaActivada: {
-    marginTop: '12px',
-    padding: '10px',
-    backgroundColor: 'rgba(16, 185, 129, 0.2)',
-    border: '1px solid #10B981',
-    borderRadius: '6px',
-    color: '#6EE7B7',
-    fontSize: '13px',
-  },
 };

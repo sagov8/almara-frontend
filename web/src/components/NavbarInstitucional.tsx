@@ -20,19 +20,44 @@ export const NavbarInstitucional: React.FC = () => {
   return (
     <header className="bg-slate-900 border-b border-slate-800 text-white shadow-lg sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Brand */}
-        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/institutional/dashboard')}>
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-bold text-lg shadow-md shadow-sky-500/20">
-            A
-          </div>
-          <div>
-            <div className="font-bold text-base tracking-wide bg-gradient-to-r from-white via-sky-100 to-sky-300 bg-clip-text text-transparent">
-              ALMARA SAAS
+        {/* Brand & Nav Links */}
+        <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/institutional/dashboard')}>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-bold text-lg shadow-md shadow-sky-500/20">
+              A
             </div>
-            <div className="text-[10px] text-slate-400 uppercase tracking-widest">
-              Inteligencia Emocional Urbana
+            <div>
+              <div className="font-bold text-base tracking-wide bg-gradient-to-r from-white via-sky-100 to-sky-300 bg-clip-text text-transparent">
+                ALMARA SAAS
+              </div>
+              <div className="text-[10px] text-slate-400 uppercase tracking-widest">
+                Inteligencia Emocional Urbana
+              </div>
             </div>
           </div>
+
+          {sesion && (
+            <nav className="hidden md:flex items-center space-x-3 text-xs font-semibold">
+              <button
+                onClick={() => navigate('/institutional/dashboard')}
+                className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+              >
+                Panel
+              </button>
+              <button
+                onClick={() => navigate('/institutional/mi-suscripcion')}
+                className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+              >
+                Mi Suscripción
+              </button>
+              <button
+                onClick={() => navigate('/institutional/planes')}
+                className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+              >
+                Planes SaaS
+              </button>
+            </nav>
+          )}
         </div>
 
         {/* User Info & Actions */}

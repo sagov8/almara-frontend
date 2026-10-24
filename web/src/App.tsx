@@ -4,6 +4,9 @@ import { AuthInstitutionalProvider } from './context/AuthInstitutionalContext';
 import { RegistroInstitucionalPage } from './pages/RegistroInstitucionalPage';
 import { LoginInstitucionalPage } from './pages/LoginInstitucionalPage';
 import { DashboardInstitucionalPage } from './pages/DashboardInstitucionalPage';
+import { CatalogoPlanesPage } from './pages/CatalogoPlanesPage';
+import { MiSuscripcionPage } from './pages/MiSuscripcionPage';
+import { CheckoutSuscripcionPage } from './pages/CheckoutSuscripcionPage';
 import { ProtectedInstitutionalRoute } from './components/ProtectedInstitutionalRoute';
 
 export const App: React.FC = () => {
@@ -13,16 +16,26 @@ export const App: React.FC = () => {
         <Routes>
           <Route path="/institutional/registro" element={<RegistroInstitucionalPage />} />
           <Route path="/institutional/login" element={<LoginInstitucionalPage />} />
+          <Route path="/institutional/planes" element={<CatalogoPlanesPage />} />
+          <Route path="/institutional/planes/renovacion" element={<CatalogoPlanesPage />} />
           <Route
-            path="/institutional/dashboard"
+            path="/institutional/checkout"
             element={
               <ProtectedInstitutionalRoute>
-                <DashboardInstitucionalPage />
+                <CheckoutSuscripcionPage />
               </ProtectedInstitutionalRoute>
             }
           />
           <Route
-            path="/institutional/planes/renovacion"
+            path="/institutional/mi-suscripcion"
+            element={
+              <ProtectedInstitutionalRoute>
+                <MiSuscripcionPage />
+              </ProtectedInstitutionalRoute>
+            }
+          />
+          <Route
+            path="/institutional/dashboard"
             element={
               <ProtectedInstitutionalRoute>
                 <DashboardInstitucionalPage />

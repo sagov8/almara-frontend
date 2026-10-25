@@ -1,32 +1,38 @@
 # Almara — Portal Web (`almara-frontend/web`)
 
-Aplicación web para **Administradores** y **Clientes Institucionales**, desarrollada con **React**, **TypeScript** y **Vite**.
+Aplicación web para **Administradores** y **Clientes Institucionales**, desarrollada con **React**, **TypeScript**, **Tailwind CSS**, **Lucide Icons** y **Vite**.
 
-## Perfiles Soportados
-1. **Administrador (`ROLE_ADMIN`)**:
-   - Inicio de sesión seguro con control de intentos fallidos y bloqueo (HU-11).
-   - Gestión del catálogo de emociones predeterminadas (HU-12).
-   - Ajuste de umbrales mínimos de participación / $k$-anonimato (HU-13).
-   - Ajuste y delimitación de zonas geográficas y resolución H3 (HU-14).
-   - Aprobación, activación y suspensión de clientes institucionales con motivo de auditoría (HU-15).
-   - Cierre de sesión seguro (HU-18).
+---
 
-2. **Cliente Institucional (`ROLE_INSTITUTIONAL`)**:
-   - Registro corporativo con NIT y correo corporativo (HU-16).
-   - Inicio de sesión y verificación (HU-17).
-   - Dashboard institucional con métricas agregadas y tendencias históricas (HU-09, HU-10).
-   - Comparación multidimensional de zonas urbanas y alertas configurables (HU-21, HU-22).
-   - Cierre de sesión seguro (HU-18).
+## Módulos Soportados
 
-## Estructura de Directorios
+### 1. Panel de Administración
+- Acceso seguro para el equipo de administración (`admin@almara.com`).
+- Gestión completa del catálogo de emociones (creación, edición y activación de emociones con íconos vectoriales Lucide).
+- Configuración de los umbrales de privacidad comunitaria (k-anonimato).
+- Gestión y delimitación de sectores territoriales urbanos.
+- Administración del ciclo de vida de usuarios y entidades institucionales.
 
-```
-web/
-└── src/
-    ├── components/    (Tarjetas de métricas, gráficos de evolución, tablas de auditoría, mapas)
-    ├── pages/         (Login, DashboardInstitucional, AdminCatalogo, AdminUmbrales, AdminUsuarios)
-    ├── routes/        (Enrutamiento protegido por token JWT y roles de usuario)
-    ├── services/      (Consumo de endpoints `/api/auth`, `/api/admin`, `/api/institutional`)
-    ├── hooks/         (Hooks reutilizables para autenticación, WebSocket y métricas)
-    └── context/       (Contexto de sesión y autenticación de usuario)
+![Panel de Administración](../docs/screenshots/panel-admin.png)
+
+### 2. Portal de Cliente Institucional (Almara SaaS)
+- Registro corporativo con correo institucional y verificación en dos pasos.
+- Panel analítico con menú lateral:
+  - **Indicadores Clave:** Métricas de clima emocional de Popayán y distribución porcentual.
+  - **Filtrado y Análisis por Zonas:** Consulta focalizada por barrios y sectores de la ciudad.
+  - **Exportación:** Descarga de reportes oficiales.
+- Catálogo de planes, pasarela de suscripción y comprobantes de pago.
+
+![Panel de Cliente Institucional](../docs/screenshots/panel-institucional.png)
+
+---
+
+## Ejecución Local
+
+```bash
+# Instalar dependencias con pnpm
+pnpm install
+
+# Iniciar servidor de desarrollo en http://localhost:5173
+pnpm dev
 ```

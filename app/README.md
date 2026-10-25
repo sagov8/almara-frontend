@@ -1,23 +1,31 @@
-# Almara — App Móvil (`almara-frontend/app`)
+# Almara — App Móvil y Ciudadana (`almara-frontend/app`)
 
-Aplicación móvil orientada a **ciudadanos anónimos**, desarrollada con **React Native** y el ecosistema **Expo**.
+Aplicación orientada a **ciudadanos anónimos**, desarrollada con **React Native** y el ecosistema **Expo**.
 
-## Principios de Diseño y Arquitectura
-- **Privacy by Design**: No existe login para ciudadanos; se genera un identificador temporal efímero en memoria solo para unicidad de sesión. Las coordenadas nunca se envían crudas al backend; se transforman internamente a celda H3.
-- **Usabilidad (RNF-20)**: Registro de emoción en máximo dos toques (HU-01).
-- **Accesibilidad (RNF-21)**: Iconos, etiquetas descriptivas y porcentajes además de colores para personas con daltonismo.
-- **Tiempo Real (RNF-01 / HU-07)**: Conexión WebSocket STOMP con reconexión automática y backoff exponencial.
+Permite registrar el estado emocional actual en segundos, indicar el nivel de intensidad, agregar un comentario contextual opcional y explorar el mapa colectivo de la ciudad de Popayán en vivo.
 
-## Estructura de Directorios
+![Aplicación Ciudadana](../docs/screenshots/app-ciudadana.png)
 
+---
+
+## Características Principales
+
+- **Privacidad Total desde el Diseño**: No requiere registro ni inicio de sesión para los ciudadanos. El envío de información es completamente anónimo y protegido.
+- **Iconografía Profesional Vectorial**: Utiliza la librería **Lucide Icons** (`lucide-react-native`), sincronizada dinámicamente con el catálogo configurado en el backend.
+- **Sincronización en Tiempo Real**: Visualización interactiva del mapa urbano mediante WebSocket, actualizando el clima barrial al instante.
+- **Protección Comunitaria**: Solo se muestran datos agregados de zonas donde múltiples vecinos han participado, cuidando la reserva de las personas.
+
+---
+
+## Ejecución Local
+
+```bash
+# Instalar dependencias con pnpm
+pnpm install
+
+# Iniciar servidor de Expo
+pnpm start
 ```
-app/
-├── assets/            (Íconos, fuentes, logo de Almara)
-└── src/
-    ├── components/    (Tarjetas de emoción, sliders, hexágonos H3, insignias de estado)
-    ├── screens/       (Pantallas: RegistroEmocion, Intensidad, Comentario, MapaEnVivo, DetalleZona)
-    ├── navigation/    (Pestañas: Inicio, Registrar, Explorar, Privacidad)
-    ├── services/      (Cliente API REST, cliente WebSocket/STOMP, utilidades GPS y celda H3)
-    ├── context/       (Estado global de conexión y preferencias anónimas)
-    └── constants/     (Colores de emociones, etiquetas, resolución H3)
-```
+
+- Para probar en navegador web, presione **`w`** en la consola o ejecute `pnpm web` (`http://localhost:8081`).
+- Para probar en dispositivo físico, escanee el código QR desde la aplicación **Expo Go**.

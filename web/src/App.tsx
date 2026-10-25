@@ -12,6 +12,9 @@ import { ProtectedInstitutionalRoute } from './components/ProtectedInstitutional
 import { LoginAdminPage } from './pages/LoginAdminPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { GestionCatalogoEmocionesPage } from './pages/GestionCatalogoEmocionesPage';
+import { GestionUmbralesMapaPage } from './pages/GestionUmbralesMapaPage';
+import { GestionZonasH3Page } from './pages/GestionZonasH3Page';
+import { GestionUsuariosInstitucionalesPage } from './pages/GestionUsuariosInstitucionalesPage';
 import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
 
 export const App: React.FC = () => {
@@ -26,6 +29,9 @@ export const App: React.FC = () => {
               <Route index element={<AdminDashboardPage />} />
               <Route path="dashboard" element={<AdminDashboardPage />} />
               <Route path="emociones" element={<GestionCatalogoEmocionesPage />} />
+              <Route path="umbrales" element={<GestionUmbralesMapaPage />} />
+              <Route path="zonas-h3" element={<GestionZonasH3Page />} />
+              <Route path="instituciones" element={<GestionUsuariosInstitucionalesPage />} />
             </Route>
 
             {/* Rutas del Módulo Cliente Institucional y Suscripciones SaaS */}

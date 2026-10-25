@@ -112,13 +112,19 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
 
           {/* Tarjeta HU-13 */}
-          <div className="bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl p-6 transition-all group flex flex-col justify-between">
+          <div
+            onClick={() => navigate('/admin/umbrales')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate('/admin/umbrales'); }}
+            className="bg-slate-900/80 border border-slate-800 hover:border-sky-500/70 hover:bg-slate-900 rounded-2xl p-6 transition-all group flex flex-col justify-between cursor-pointer shadow-lg hover:shadow-sky-500/10 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+          >
             <div>
               <div className="w-12 h-12 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                 <Sliders className="w-6 h-6" />
               </div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400">HU-13</span>
-              <h3 className="text-base font-bold text-white mt-1">Umbrales del Mapa</h3>
+              <h3 className="text-base font-bold text-white mt-1 group-hover:text-sky-300 transition-colors">Umbrales del Mapa</h3>
               <p className="text-xs text-slate-400 mt-2">
                 Ajustar parámetro $k$-anonimato para visualizar emociones agregadas y proteger la privacidad.
               </p>
@@ -130,13 +136,19 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
 
           {/* Tarjeta HU-14 */}
-          <div className="bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl p-6 transition-all group flex flex-col justify-between">
+          <div
+            onClick={() => navigate('/admin/zonas-h3')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate('/admin/zonas-h3'); }}
+            className="bg-slate-900/80 border border-slate-800 hover:border-emerald-500/70 hover:bg-slate-900 rounded-2xl p-6 transition-all group flex flex-col justify-between cursor-pointer shadow-lg hover:shadow-emerald-500/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+          >
             <div>
               <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                 <MapPin className="w-6 h-6" />
               </div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">HU-14</span>
-              <h3 className="text-base font-bold text-white mt-1">Zonas Geográficas H3</h3>
+              <h3 className="text-base font-bold text-white mt-1 group-hover:text-emerald-300 transition-colors">Zonas Geográficas H3</h3>
               <p className="text-xs text-slate-400 mt-2">
                 Ajustar resolución espacial de celdas H3 e indexar polígonos urbanos en PostGIS.
               </p>
@@ -148,13 +160,19 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
 
           {/* Tarjeta HU-15 */}
-          <div className="bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl p-6 transition-all group flex flex-col justify-between">
+          <div
+            onClick={() => navigate('/admin/instituciones')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate('/admin/instituciones'); }}
+            className="bg-slate-900/80 border border-slate-800 hover:border-indigo-500/70 hover:bg-slate-900 rounded-2xl p-6 transition-all group flex flex-col justify-between cursor-pointer shadow-lg hover:shadow-indigo-500/10 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+          >
             <div>
               <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                 <Building2 className="w-6 h-6" />
               </div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">HU-15</span>
-              <h3 className="text-base font-bold text-white mt-1">Usuarios Institucionales</h3>
+              <h3 className="text-base font-bold text-white mt-1 group-hover:text-indigo-300 transition-colors">Usuarios Institucionales</h3>
               <p className="text-xs text-slate-400 mt-2">
                 Aprobar cuentas, suspender o dar de baja, revocar sesiones y notificar vía SMTP/Email.
               </p>

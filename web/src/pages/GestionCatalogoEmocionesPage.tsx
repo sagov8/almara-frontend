@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Smile,
   Plus,
@@ -12,7 +12,8 @@ import {
   ArrowLeft,
   X,
   History,
-  Palette
+  Palette,
+  LogOut,
 } from 'lucide-react';
 import { useAuthAdmin } from '../context/AuthAdminContext';
 import {
@@ -25,7 +26,8 @@ import {
 import { EmocionAdmin, CrearEmocionSolicitud, ModificarEmocionSolicitud, ErrorApiAdmin } from '../types/admin';
 
 export const GestionCatalogoEmocionesPage: React.FC = () => {
-  const { sesion } = useAuthAdmin();
+  const { sesion, cerrarSesion } = useAuthAdmin();
+  const navigate = useNavigate();
   const token = sesion?.token || '';
 
   const [emociones, setEmociones] = useState<EmocionAdmin[]>([]);
@@ -101,6 +103,8 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
 
     setProcesando(true);
     setError(null);
+    setExito(null);
+
     try {
       const solicitud: CrearEmocionSolicitud = {
         idEmocion: formId.trim().toUpperCase(),
@@ -108,11 +112,11 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
         codigoHexColor: formColor.trim(),
         codigoHexFondo: formFondo.trim() || formColor.trim(),
         iconoSvg: formIcono.trim(),
-        descripcion: formDescripcion.trim(),
+        descripcion: formDescripcion.trim() || undefined,
       };
 
-      await agregarEmocionAdmin(token, solicitud);
-      setExito(`Emoción '${solicitud.nombreEtiqueta}' agregada al catálogo exitosamente (HU-12).`);
+      const creada = await agregarEmocionAdmin(token, solicitud);
+      setExito(`Emoción '${creada.nombreEtiqueta}' agregada exitosamente al catálogo.`);
       setModalCrearAbierto(false);
       await cargarCatalogo();
     } catch (err) {
@@ -125,24 +129,27 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
 
   const manejarEditar = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!emocionSeleccionada || !formEtiqueta.trim() || !formColor.trim() || !formIcono.trim()) {
+    if (!emocionSeleccionada) return;
+    if (!formEtiqueta.trim() || !formColor.trim() || !formIcono.trim()) {
       setError('Por favor complete los campos obligatorios.');
       return;
     }
 
     setProcesando(true);
     setError(null);
+    setExito(null);
+
     try {
       const solicitud: ModificarEmocionSolicitud = {
         nombreEtiqueta: formEtiqueta.trim(),
         codigoHexColor: formColor.trim(),
         codigoHexFondo: formFondo.trim() || formColor.trim(),
         iconoSvg: formIcono.trim(),
-        descripcion: formDescripcion.trim(),
+        descripcion: formDescripcion.trim() || undefined,
       };
 
-      await modificarEmocionAdmin(token, emocionSeleccionada.idEmocion, solicitud);
-      setExito(`Emoción '${emocionSeleccionada.idEmocion}' actualizada exitosamente.`);
+      const modificada = await modificarEmocionAdmin(token, emocionSeleccionada.idEmocion, solicitud);
+      setExito(`Emoción '${modificada.nombreEtiqueta}' actualizada exitosamente.`);
       setModalEditarAbierto(false);
       await cargarCatalogo();
     } catch (err) {
@@ -154,7 +161,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
   };
 
   const manejarDesactivar = async (emocion: EmocionAdmin) => {
-    if (!window.confirm(`¿Está seguro de desactivar la emoción '${emocion.nombreEtiqueta}'? (Borrado lógico - HU-12)`)) {
+    if (!window.confirm(`¿Está seguro de desactivar la emoción '${emocion.nombreEtiqueta}'? (El catálogo requiere al menos 3 activas)`)) {
       return;
     }
 
@@ -190,58 +197,71 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
   const totalActivas = emociones.filter((e) => e.activo).length;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col">
       {/* Barra de cabecera */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-30">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               to="/admin/dashboard"
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
               title="Volver al panel"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center">
                 <Smile className="w-4 h-4" />
               </div>
               <div>
-                <h1 className="font-extrabold text-white text-base tracking-tight leading-none">
+                <h1 className="font-extrabold text-slate-900 text-base tracking-tight leading-none">
                   Gestión del Catálogo de Emociones
                 </h1>
-                <span className="text-[11px] text-slate-400">HU-12 • Módulo de Administración</span>
+                <span className="text-[11px] text-slate-500">HU-12 • Módulo de Administración</span>
               </div>
             </div>
           </div>
 
-          <button
-            onClick={abrirModalCrear}
-            disabled={procesando}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 transition-all disabled:opacity-50"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Agregar Emoción</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline text-xs text-slate-500">Admin: {sesion?.nombreCompleto}</span>
+            <button
+              onClick={abrirModalCrear}
+              disabled={procesando}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 transition-all disabled:opacity-50 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Agregar Emoción</span>
+            </button>
+            <button
+              onClick={async () => {
+                await cerrarSesion();
+                navigate('/admin/login');
+              }}
+              className="p-2 rounded-lg bg-slate-100 hover:bg-rose-50 hover:text-rose-700 border border-slate-200 text-slate-600 transition cursor-pointer"
+              title="Cerrar sesión de administrador (HU-18)"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </header>
 
       {/* Contenido */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Banner de métrica de regla RF-05 */}
-        <div className="mb-6 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="mb-6 bg-white border border-slate-200 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
           <div>
-            <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider mb-1">
+            <div className="flex items-center gap-2 text-xs font-bold text-amber-700 uppercase tracking-wider mb-1">
               <Palette className="w-4 h-4" />
               <span>Regla de Negocio RF-05</span>
             </div>
-            <p className="text-sm text-slate-300">
-              El catálogo debe mantener siempre un mínimo de <strong className="text-white">3 emociones activas</strong> para garantizar el funcionamiento del registro ciudadano.
+            <p className="text-sm text-slate-600">
+              El catálogo debe mantener siempre un mínimo de <strong className="text-slate-900">3 emociones activas</strong> para garantizar el funcionamiento del registro ciudadano.
             </p>
           </div>
-          <div className="flex items-center gap-3 bg-slate-950/70 border border-slate-800 px-4 py-2 rounded-xl text-xs">
-            <span className="text-slate-400">Activas actuales:</span>
-            <span className={`font-mono font-bold text-sm ${totalActivas <= 3 ? 'text-amber-400' : 'text-emerald-400'}`}>
+          <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl text-xs">
+            <span className="text-slate-500">Activas actuales:</span>
+            <span className={`font-mono font-bold text-sm ${totalActivas <= 3 ? 'text-amber-600' : 'text-emerald-600'}`}>
               {totalActivas} / {emociones.length}
             </span>
           </div>
@@ -249,26 +269,26 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
 
         {/* Mensajes de Alerta */}
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-rose-950/40 border border-rose-600/50 text-rose-200 text-xs sm:text-sm flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-rose-400" />
+          <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm flex items-start gap-3 shadow-sm">
+            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-rose-600" />
             <div className="flex-1">
               <p className="font-semibold">Error en la operación</p>
               <p className="mt-0.5 opacity-90">{error}</p>
             </div>
-            <button onClick={() => setError(null)} className="text-rose-400 hover:text-white">
+            <button onClick={() => setError(null)} className="text-rose-500 hover:text-rose-800 cursor-pointer">
               <X className="w-4 h-4" />
             </button>
           </div>
         )}
 
         {exito && (
-          <div className="mb-6 p-4 rounded-xl bg-emerald-950/40 border border-emerald-600/50 text-emerald-200 text-xs sm:text-sm flex items-start gap-3">
-            <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5 text-emerald-400" />
+          <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm flex items-start gap-3 shadow-sm">
+            <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5 text-emerald-600" />
             <div className="flex-1">
               <p className="font-semibold">Operación exitosa</p>
               <p className="mt-0.5 opacity-90">{exito}</p>
             </div>
-            <button onClick={() => setExito(null)} className="text-emerald-400 hover:text-white">
+            <button onClick={() => setExito(null)} className="text-emerald-500 hover:text-emerald-800 cursor-pointer">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -281,9 +301,9 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
             <span className="text-sm">Cargando catálogo oficial de emociones...</span>
           </div>
         ) : emociones.length === 0 ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center text-slate-400">
-            <Smile className="w-12 h-12 mx-auto text-slate-600 mb-3" />
-            <p className="text-base font-semibold text-white">No hay emociones en el catálogo</p>
+          <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center text-slate-500 shadow-sm">
+            <Smile className="w-12 h-12 mx-auto text-slate-400 mb-3" />
+            <p className="text-base font-semibold text-slate-900">No hay emociones en el catálogo</p>
             <p className="text-xs text-slate-500 mt-1">Haga clic en 'Agregar Emoción' para crear una.</p>
           </div>
         ) : (
@@ -291,10 +311,10 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
             {emociones.map((emocion) => (
               <div
                 key={emocion.idEmocion}
-                className={`bg-slate-900/90 border rounded-2xl p-5 flex flex-col justify-between transition-all ${
+                className={`bg-white border rounded-2xl p-5 flex flex-col justify-between transition-all shadow-sm ${
                   emocion.activo
-                    ? 'border-slate-800 hover:border-slate-700 shadow-lg shadow-black/20'
-                    : 'border-slate-800/60 opacity-60 bg-slate-900/40'
+                    ? 'border-slate-200 hover:border-amber-300 hover:shadow-md'
+                    : 'border-slate-200 opacity-60 bg-slate-50'
                 }`}
               >
                 <div>
@@ -310,10 +330,10 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                         <span>{emocion.iconoSvg}</span>
                       </div>
                       <div>
-                        <h3 className="font-bold text-white text-base leading-tight">
+                        <h3 className="font-bold text-slate-900 text-base leading-tight">
                           {emocion.nombreEtiqueta}
                         </h3>
-                        <span className="text-[11px] font-mono font-semibold text-slate-400">
+                        <span className="text-[11px] font-mono font-semibold text-slate-500">
                           {emocion.idEmocion}
                         </span>
                       </div>
@@ -322,41 +342,41 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                     <span
                       className={`px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${
                         emocion.activo
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                          : 'bg-slate-800 text-slate-400 border-slate-700'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          : 'bg-slate-100 text-slate-600 border-slate-200'
                       }`}
                     >
                       {emocion.activo ? 'Activa' : 'Inactiva'}
                     </span>
                   </div>
 
-                  <p className="text-xs text-slate-400 line-clamp-2 mb-4">
+                  <p className="text-xs text-slate-600 line-clamp-2 mb-4 leading-relaxed">
                     {emocion.descripcion || 'Sin descripción contextual.'}
                   </p>
 
-                  <div className="flex items-center gap-4 text-xs text-slate-400 mb-4 bg-slate-950/60 px-3 py-2 rounded-xl border border-slate-800">
+                  <div className="flex items-center gap-4 text-xs text-slate-600 mb-4 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
                     <div className="flex items-center gap-1.5">
                       <div
-                        className="w-3.5 h-3.5 rounded-full border border-white/20"
+                        className="w-3.5 h-3.5 rounded-full border border-slate-300"
                         style={{ backgroundColor: emocion.codigoHexColor }}
                       ></div>
-                      <span className="font-mono text-[11px]">{emocion.codigoHexColor}</span>
+                      <span className="font-mono text-[11px] text-slate-700">{emocion.codigoHexColor}</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 ml-auto text-[11px]">
-                      <History className="w-3.5 h-3.5 text-slate-500" />
+                    <div className="flex items-center gap-1.5 ml-auto text-[11px] text-slate-500">
+                      <History className="w-3.5 h-3.5 text-slate-400" />
                       <span>{emocion.totalReportesAsociados} eventos</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                   <button
                     onClick={() => abrirModalEditar(emocion)}
                     disabled={procesando}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-white transition-all font-medium"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs text-slate-800 transition-all font-medium cursor-pointer"
                   >
-                    <Edit2 className="w-3.5 h-3.5 text-amber-400" />
+                    <Edit2 className="w-3.5 h-3.5 text-amber-600" />
                     <span>Modificar</span>
                   </button>
 
@@ -364,7 +384,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                     <button
                       onClick={() => manejarDesactivar(emocion)}
                       disabled={procesando}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-950/70 hover:text-rose-300 text-xs text-slate-400 border border-transparent hover:border-rose-800 transition-all font-medium"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs transition-all font-medium cursor-pointer"
                       title="Desactivar emoción (borrado lógico)"
                     >
                       <PowerOff className="w-3.5 h-3.5" />
@@ -374,7 +394,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                     <button
                       onClick={() => manejarActivar(emocion)}
                       disabled={procesando}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/50 hover:bg-emerald-900/60 text-emerald-300 text-xs border border-emerald-800/60 transition-all font-medium"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs border border-emerald-200 transition-all font-medium cursor-pointer"
                       title="Reactivar emoción en el catálogo"
                     >
                       <Power className="w-3.5 h-3.5" />
@@ -390,16 +410,16 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
 
       {/* Modal Crear Emoción */}
       {modalCrearAbierto && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg p-6 sm:p-7 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg p-6 sm:p-7 shadow-2xl relative">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Plus className="w-5 h-5 text-amber-400" />
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Plus className="w-5 h-5 text-amber-600" />
                 <span>Agregar Nueva Emoción (HU-12)</span>
               </h2>
               <button
                 onClick={() => setModalCrearAbierto(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -408,7 +428,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
             <form onSubmit={manejarCrear} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">
                     ID Único (Inmutable)
                   </label>
                   <input
@@ -417,13 +437,13 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                     onChange={(e) => setFormId(e.target.value.toUpperCase())}
                     placeholder="CALMA"
                     required
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-sm uppercase focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-sm uppercase focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
                   />
                   <span className="text-[10px] text-slate-500">Ej: CALMA, SORPRESA</span>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">
                     Etiqueta Visible
                   </label>
                   <input
@@ -432,14 +452,14 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                     onChange={(e) => setFormEtiqueta(e.target.value)}
                     placeholder="Calma"
                     required
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">
                     Color Hex (#RRGGBB)
                   </label>
                   <div className="flex items-center gap-2">
@@ -456,13 +476,13 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                       placeholder="#3B82F6"
                       pattern="^#[0-9A-Fa-f]{6}$"
                       required
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">
                     Color Fondo (#RRGGBB)
                   </label>
                   <div className="flex items-center gap-2">
@@ -478,14 +498,14 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                       onChange={(e) => setFormFondo(e.target.value.toUpperCase())}
                       placeholder="#DBEAFE"
                       pattern="^#[0-9A-Fa-f]{6}$"
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-300 mb-1">
+                <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">
                   Ícono o Emoji SVG
                 </label>
                 <div className="flex items-center gap-2 mb-2">
@@ -495,7 +515,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                     onChange={(e) => setFormIcono(e.target.value)}
                     placeholder="😌"
                     required
-                    className="w-20 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-center text-xl focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                    className="w-20 px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 text-center text-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
                   />
                   <div className="flex flex-wrap gap-1.5 flex-1">
                     {emojisSugeridos.map((emoji) => (
@@ -503,7 +523,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                         key={emoji}
                         type="button"
                         onClick={() => setFormIcono(emoji)}
-                        className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm"
+                        className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm cursor-pointer border border-slate-200"
                       >
                         {emoji}
                       </button>
@@ -513,7 +533,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-300 mb-1">
+                <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">
                   Descripción
                 </label>
                 <textarea
@@ -522,12 +542,12 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                   placeholder="Detalle contextual de la emoción..."
                   rows={2}
                   maxLength={150}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
                 />
               </div>
 
               {/* Vista previa */}
-              <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center gap-3">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3">
                 <div
                   className="w-10 h-10 rounded-lg flex items-center justify-center text-xl border"
                   style={{ backgroundColor: formFondo, borderColor: formColor }}
@@ -535,8 +555,8 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                   {formIcono}
                 </div>
                 <div>
-                  <span className="text-xs font-bold text-white">{formEtiqueta || 'Nombre'}</span>
-                  <p className="text-[11px] text-slate-400">{formDescripcion || 'Vista previa visual'}</p>
+                  <span className="text-xs font-bold text-slate-900">{formEtiqueta || 'Nombre'}</span>
+                  <p className="text-[11px] text-slate-500">{formDescripcion || 'Vista previa visual'}</p>
                 </div>
               </div>
 
@@ -544,14 +564,14 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setModalCrearAbierto(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs text-slate-700 font-semibold cursor-pointer border border-slate-200"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={procesando}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 disabled:opacity-50 cursor-pointer"
                 >
                   {procesando ? 'Guardando...' : 'Guardar Emoción'}
                 </button>
@@ -563,16 +583,16 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
 
       {/* Modal Modificar Emoción */}
       {modalEditarAbierto && emocionSeleccionada && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg p-6 sm:p-7 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg p-6 sm:p-7 shadow-2xl relative">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Edit2 className="w-5 h-5 text-amber-400" />
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Edit2 className="w-5 h-5 text-amber-600" />
                 <span>Modificar Emoción: {emocionSeleccionada.idEmocion}</span>
               </h2>
               <button
                 onClick={() => setModalEditarAbierto(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -580,7 +600,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
 
             <form onSubmit={manejarEditar} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-300 mb-1">
+                <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">
                   Etiqueta Visible
                 </label>
                 <input
@@ -588,13 +608,13 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                   value={formEtiqueta}
                   onChange={(e) => setFormEtiqueta(e.target.value)}
                   required
-                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">
                     Color Hex (#RRGGBB)
                   </label>
                   <div className="flex items-center gap-2">
@@ -610,13 +630,13 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                       onChange={(e) => setFormColor(e.target.value.toUpperCase())}
                       pattern="^#[0-9A-Fa-f]{6}$"
                       required
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">
                     Color Fondo (#RRGGBB)
                   </label>
                   <div className="flex items-center gap-2">
@@ -631,14 +651,14 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                       value={formFondo}
                       onChange={(e) => setFormFondo(e.target.value.toUpperCase())}
                       pattern="^#[0-9A-Fa-f]{6}$"
-                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-300 mb-1">
+                <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">
                   Ícono o Emoji SVG
                 </label>
                 <div className="flex items-center gap-2 mb-2">
@@ -647,7 +667,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                     value={formIcono}
                     onChange={(e) => setFormIcono(e.target.value)}
                     required
-                    className="w-20 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-center text-xl focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                    className="w-20 px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 text-center text-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
                   />
                   <div className="flex flex-wrap gap-1.5 flex-1">
                     {emojisSugeridos.map((emoji) => (
@@ -655,7 +675,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                         key={emoji}
                         type="button"
                         onClick={() => setFormIcono(emoji)}
-                        className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm"
+                        className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm cursor-pointer border border-slate-200"
                       >
                         {emoji}
                       </button>
@@ -665,7 +685,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-300 mb-1">
+                <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">
                   Descripción
                 </label>
                 <textarea
@@ -673,12 +693,12 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                   onChange={(e) => setFormDescripcion(e.target.value)}
                   rows={2}
                   maxLength={150}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
                 />
               </div>
 
               {/* Vista previa */}
-              <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center gap-3">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3">
                 <div
                   className="w-10 h-10 rounded-lg flex items-center justify-center text-xl border"
                   style={{ backgroundColor: formFondo, borderColor: formColor }}
@@ -686,8 +706,8 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                   {formIcono}
                 </div>
                 <div>
-                  <span className="text-xs font-bold text-white">{formEtiqueta}</span>
-                  <p className="text-[11px] text-slate-400">{formDescripcion || 'Vista previa visual'}</p>
+                  <span className="text-xs font-bold text-slate-900">{formEtiqueta}</span>
+                  <p className="text-[11px] text-slate-500">{formDescripcion || 'Vista previa visual'}</p>
                 </div>
               </div>
 
@@ -695,14 +715,14 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setModalEditarAbierto(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs text-slate-700 font-semibold cursor-pointer border border-slate-200"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={procesando}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 disabled:opacity-50 cursor-pointer"
                 >
                   {procesando ? 'Actualizando...' : 'Actualizar Emoción'}
                 </button>

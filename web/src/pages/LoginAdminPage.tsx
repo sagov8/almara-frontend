@@ -48,31 +48,31 @@ export const LoginAdminPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-center items-center p-4 sm:p-6 font-sans relative overflow-hidden">
-      {/* Resplandores oscuros decorativos de fondo */}
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col justify-center items-center p-4 sm:p-6 font-sans relative overflow-hidden">
+      {/* Resplandores decorativos de fondo en modo claro */}
+      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-sky-400/10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="w-full max-w-md relative z-10">
         {/* Cabecera / Marca Admin */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 shadow-lg shadow-amber-500/20 mb-4 border border-amber-400/20">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 shadow-md shadow-amber-500/20 mb-4 border border-amber-300">
             <Shield className="w-7 h-7 text-white" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Panel de Administración
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Sistema Almara • Módulo Administrativo Global
           </p>
         </div>
 
         {/* Tarjeta del Formulario */}
-        <div className="bg-slate-800/90 backdrop-blur-md border border-slate-700/80 rounded-3xl p-7 sm:p-8 shadow-2xl">
+        <div className="bg-white border border-slate-200 rounded-3xl p-7 sm:p-8 shadow-xl shadow-slate-200/60">
           <div className="mb-6">
-            <h2 className="text-lg font-bold text-white">Iniciar Sesión de Administrador</h2>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Ingrese con sus credenciales autorizadas con rol <span className="font-semibold text-amber-400">ROLE_ADMIN</span> (HU-11).
+            <h2 className="text-lg font-bold text-slate-900">Iniciar Sesión de Administrador</h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Ingrese con sus credenciales autorizadas.
             </p>
           </div>
 
@@ -80,11 +80,11 @@ export const LoginAdminPage: React.FC = () => {
             <div
               className={`mb-5 p-4 rounded-xl border flex items-start gap-3 text-xs sm:text-sm ${
                 estaBloqueado
-                  ? 'bg-rose-950/50 border-rose-600/50 text-rose-200'
-                  : 'bg-amber-950/40 border-amber-600/50 text-amber-200'
+                  ? 'bg-rose-50 border-rose-200 text-rose-800'
+                  : 'bg-amber-50 border-amber-200 text-amber-900'
               }`}
             >
-              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-amber-400" />
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-amber-600" />
               <div>
                 <p className="font-semibold">
                   {estaBloqueado ? 'Acceso temporalmente suspendido' : 'Error de autenticación'}
@@ -98,7 +98,7 @@ export const LoginAdminPage: React.FC = () => {
             <div>
               <label
                 htmlFor="usuarioAdmin"
-                className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5"
+                className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5"
               >
                 Usuario o Correo Administrativo
               </label>
@@ -114,7 +114,7 @@ export const LoginAdminPage: React.FC = () => {
                   placeholder="admin@almara.com"
                   disabled={cargando}
                   required
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-700 bg-slate-900/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all shadow-sm"
                 />
               </div>
             </div>
@@ -122,7 +122,7 @@ export const LoginAdminPage: React.FC = () => {
             <div>
               <label
                 htmlFor="passwordAdmin"
-                className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5"
+                className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5"
               >
                 Contraseña
               </label>
@@ -138,7 +138,7 @@ export const LoginAdminPage: React.FC = () => {
                   placeholder="••••••••••••"
                   disabled={cargando}
                   required
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-700 bg-slate-900/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all shadow-sm"
                 />
               </div>
             </div>
@@ -146,7 +146,7 @@ export const LoginAdminPage: React.FC = () => {
             <button
               type="submit"
               disabled={cargando}
-              className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-sm shadow-md shadow-amber-500/20 hover:shadow-amber-500/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {cargando ? (
                 <>
@@ -163,20 +163,20 @@ export const LoginAdminPage: React.FC = () => {
           </form>
 
           {/* Información de entorno de desarrollo */}
-          <div className="mt-6 pt-5 border-t border-slate-700/60 text-center">
-            <p className="text-xs text-slate-400">
-              Credencial preconfigurada: <code className="bg-slate-900 px-1.5 py-0.5 rounded text-amber-300 font-mono">admin@almara.com</code> / <code className="bg-slate-900 px-1.5 py-0.5 rounded text-amber-300 font-mono">Admin1234*</code>
+          <div className="mt-6 pt-5 border-t border-slate-100 text-center">
+            <p className="text-xs text-slate-500">
+              Credencial preconfigurada: <code className="bg-slate-100 text-amber-800 font-mono px-1.5 py-0.5 rounded border border-slate-200">admin@almara.com</code> / <code className="bg-slate-100 text-amber-800 font-mono px-1.5 py-0.5 rounded border border-slate-200">Admin1234*</code>
             </p>
           </div>
         </div>
 
         {/* Enlace al mapa ciudadano o login institucional */}
-        <div className="mt-6 text-center text-xs text-slate-400 space-x-4">
-          <a href="/" className="hover:text-amber-400 transition-colors">
+        <div className="mt-6 text-center text-xs text-slate-500 space-x-4">
+          <a href="/" className="hover:text-amber-600 transition-colors">
             ← Volver al Mapa Público
           </a>
           <span>•</span>
-          <a href="/institutional/login" className="hover:text-amber-400 transition-colors">
+          <a href="/institutional/login" className="hover:text-amber-600 transition-colors">
             Acceso Institucional
           </a>
         </div>

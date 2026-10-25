@@ -7,7 +7,6 @@ import {
 } from '../types/institutional';
 import {
   CheckCircle2,
-  Printer,
   Download,
   Copy,
   Check,
@@ -47,7 +46,6 @@ export const ModalComprobantePago: React.FC<ModalComprobantePagoProps> = ({
 }) => {
   const [copiado, setCopiado] = useState(false);
   const [generandoPdf, setGenerandoPdf] = useState(false);
-  const [imprimiendo, setImprimiendo] = useState(false);
   const [descargaExitosa, setDescargaExitosa] = useState(false);
   const [navegandoDestino, setNavegandoDestino] = useState<'dashboard' | 'suscripcion' | null>(null);
 
@@ -159,9 +157,10 @@ export const ModalComprobantePago: React.FC<ModalComprobantePagoProps> = ({
       doc.text(montoFormateado, 22, 88);
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
+      doc.setFontSize(7.5);
       doc.setTextColor(100, 116, 139);
-      doc.text('Moneda legal colombiana (COP) • IVA 19% incluido ($0 COP régimen especial SaaS)', 100, 88);
+      doc.text('Moneda legal colombiana (COP)', 188, 80, { align: 'right' });
+      doc.text('IVA 19% incluido ($0 COP régimen especial SaaS)', 188, 86, { align: 'right' });
 
       // 4. Tabla de Metadatos de la Transacción
       const filas: [string, string][] = [
@@ -271,14 +270,6 @@ export const ModalComprobantePago: React.FC<ModalComprobantePagoProps> = ({
     } finally {
       setGenerandoPdf(false);
     }
-  };
-
-  const manejarImpresion = () => {
-    setImprimiendo(true);
-    setTimeout(() => {
-      window.print();
-      setImprimiendo(false);
-    }, 150);
   };
 
   return (
@@ -479,7 +470,7 @@ export const ModalComprobantePago: React.FC<ModalComprobantePagoProps> = ({
         {/* Botones de Acción (Pie del Modal) */}
         <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 space-y-2.5 no-imprimir">
           {/* Fila Principal de Botones PDF e Impresión */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-md mx-auto w-full">
             <button
               type="button"
               id="btn-descargar-pdf"
@@ -508,23 +499,13 @@ export const ModalComprobantePago: React.FC<ModalComprobantePagoProps> = ({
 
             <button
               type="button"
-              onClick={manejarImpresion}
-              disabled={imprimiendo}
-              className="w-full py-2.5 px-3 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-50"
-            >
-              <Printer className="w-4 h-4 text-slate-600" />
-              <span>{imprimiendo ? 'Imprimiendo...' : 'Imprimir'}</span>
-            </button>
-
-            <button
-              type="button"
               disabled={navegandoDestino !== null}
               aria-busy={navegandoDestino === 'dashboard'}
               onClick={() => {
                 setNavegandoDestino('dashboard');
                 onIrAlDashboard();
               }}
-              className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+              className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-60 disabled:cursor-wait"
             >
               {navegandoDestino === 'dashboard' ? (
                 <>

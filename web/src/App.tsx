@@ -23,7 +23,7 @@ export const App: React.FC = () => {
       <AuthInstitutionalProvider>
         <BrowserRouter>
           <Routes>
-            {/* Rutas del Módulo de Administración (HU-11 a HU-15, HU-18) */}
+            {/* Rutas del Módulo de Administración */}
             <Route path="/admin/login" element={<LoginAdminPage />} />
             <Route path="/admin" element={<ProtectedAdminRoute />}>
               <Route index element={<AdminDashboardPage />} />

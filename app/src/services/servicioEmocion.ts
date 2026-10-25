@@ -266,7 +266,7 @@ export async function obtenerCatalogoEmociones(): Promise<DefinicionEmocion[]> {
           etiqueta: item.etiquetaVisible || item.id,
           colorPrincipal: item.codigoHexColor || '#10B981',
           colorFondoCirculo: item.codigoHexFondo || '#D1FAE5',
-          simboloFacial: item.iconoSvg || '😊',
+          simboloFacial: item.iconoSvg || 'Smile',
           descripcion: item.descripcion || '',
         }));
       }

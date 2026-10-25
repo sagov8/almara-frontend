@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { ESCALA_INTENSIDAD, obtenerEtiquetaIntensidad } from '../constants/intensidades';
+import { Lock } from 'lucide-react-native';
 
 interface PropiedadesSelectorIntensidad {
   nivelSeleccionado: number;
@@ -194,8 +195,9 @@ export const SelectorIntensidad: React.FC<PropiedadesSelectorIntensidad> = ({
       {/* Mensaje de ayuda si está inhabilitado (Criterio 1: requiere emoción previa) */}
       {deshabilitado && (
         <View style={estilos.contenedorAvisoDeshabilitado}>
+          <Lock size={14} color="#6B7280" style={{ marginRight: 6 }} />
           <Text style={estilos.textoAvisoDeshabilitado}>
-            🔒 Selecciona una emoción arriba para habilitar la intensidad.
+            Selecciona una emoción arriba para habilitar la intensidad.
           </Text>
         </View>
       )}

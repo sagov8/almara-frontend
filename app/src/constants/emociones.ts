@@ -1,10 +1,11 @@
 /**
- * Catálogo oficial de emociones predeterminadas de Almara (HU-01).
- * Corresponde a los colores y disposición del mockup de la interfaz móvil.
+ * Catálogo oficial de emociones predeterminadas de Almara.
+ * Corresponde a los colores y disposición del mockup de la interfaz móvil
+ * y se sincroniza dinámicamente con la base de datos (módulo de administración).
  */
 
 export interface DefinicionEmocion {
-  id: 'FELICIDAD' | 'NEUTRALIDAD' | 'PREOCUPACION' | 'ENFADO' | 'ANSIEDAD';
+  id: string;
   etiqueta: string;
   colorPrincipal: string;
   colorFondoCirculo: string;
@@ -19,7 +20,7 @@ export const LISTA_EMOCIONES: DefinicionEmocion[] = [
     colorPrincipal: '#10B981',
     colorFondoCirculo: '#D1FAE5',
     descripcion: 'Alegría, satisfacción y bienestar general.',
-    simboloFacial: '😊',
+    simboloFacial: 'Smile',
   },
   {
     id: 'NEUTRALIDAD',
@@ -27,7 +28,7 @@ export const LISTA_EMOCIONES: DefinicionEmocion[] = [
     colorPrincipal: '#EAB308',
     colorFondoCirculo: '#FEF9C3',
     descripcion: 'Estado equilibrado, tranquilo y regular.',
-    simboloFacial: '😐',
+    simboloFacial: 'Meh',
   },
   {
     id: 'PREOCUPACION',
@@ -35,7 +36,7 @@ export const LISTA_EMOCIONES: DefinicionEmocion[] = [
     colorPrincipal: '#F97316',
     colorFondoCirculo: '#FFEDD5',
     descripcion: 'Inquietud o tensión moderada ante una situación.',
-    simboloFacial: '😟',
+    simboloFacial: 'Frown',
   },
   {
     id: 'ENFADO',
@@ -43,7 +44,7 @@ export const LISTA_EMOCIONES: DefinicionEmocion[] = [
     colorPrincipal: '#EF4444',
     colorFondoCirculo: '#FEE2E2',
     descripcion: 'Molestia, frustración o irritación.',
-    simboloFacial: '😠',
+    simboloFacial: 'Flame',
   },
   {
     id: 'ANSIEDAD',
@@ -51,6 +52,6 @@ export const LISTA_EMOCIONES: DefinicionEmocion[] = [
     colorPrincipal: '#8B5CF6',
     colorFondoCirculo: '#EDE9FE',
     descripcion: 'Nerviosismo, agobio o estrés acumulado.',
-    simboloFacial: '😰',
+    simboloFacial: 'CloudRain',
   },
 ];

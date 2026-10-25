@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Check, Lock } from 'lucide-react';
 import { PlanSuscripcionCatalogoDto } from '../types/institutional';
 
 interface TarjetaPlanSaaSProps {
@@ -41,8 +41,9 @@ export const TarjetaPlanSaaS: React.FC<TarjetaPlanSaaSProps> = ({ plan, onSelecc
       {/* Insignia Superior */}
       <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
         {plan.esPlanActual ? (
-          <span className="px-4 py-1 text-xs font-bold uppercase tracking-wider rounded-full bg-emerald-600 text-white shadow-sm">
-            ✓ Tu Plan Actual
+          <span className="px-4 py-1 text-xs font-bold uppercase tracking-wider rounded-full bg-emerald-600 text-white shadow-sm inline-flex items-center gap-1">
+            <Check className="w-3.5 h-3.5 stroke-[3]" />
+            <span>Tu Plan Actual</span>
           </span>
         ) : esStandard ? (
           <span className="px-4 py-1 text-xs font-bold uppercase tracking-wider rounded-full bg-sky-600 text-white shadow-sm">
@@ -87,12 +88,12 @@ export const TarjetaPlanSaaS: React.FC<TarjetaPlanSaaSProps> = ({ plan, onSelecc
             {plan.modulos.map((modulo) => (
               <li key={modulo.idModulo} className="flex items-start text-xs space-x-2.5">
                 {modulo.habilitadoEnPlan ? (
-                  <span className="flex-shrink-0 w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[10px]">
-                    ✓
+                  <span className="flex-shrink-0 w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                    <Check className="w-2.5 h-2.5 stroke-[3]" />
                   </span>
                 ) : (
-                  <span className="flex-shrink-0 w-4 h-4 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-[10px]">
-                    🔒
+                  <span className="flex-shrink-0 w-4 h-4 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center">
+                    <Lock className="w-2.5 h-2.5" />
                   </span>
                 )}
                 <div className="flex-1">

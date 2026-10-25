@@ -1,5 +1,5 @@
 /**
- * Tipos e interfaces de datos para el Módulo de Administración de Almara (HU-11 a HU-15, HU-18).
+ * Tipos e interfaces de datos para el Módulo de Administración de Almara.
  */
 
 export interface LoginAdminSolicitud {
@@ -39,7 +39,7 @@ export interface ErrorApiAdmin {
 }
 
 /**
- * Representación de una emoción en el panel de administración (HU-12).
+ * Representación de una emoción en el panel de administración.
  */
 export interface EmocionAdmin {
   idEmocion: string;
@@ -71,7 +71,7 @@ export interface ModificarEmocionSolicitud {
 }
 
 /**
- * Parámetros y reglas de privacidad de k-anonimato del mapa (HU-13).
+ * Parámetros y reglas de privacidad de k-anonimato del mapa.
  */
 export interface ConfiguracionUmbralMapa {
   id: string;
@@ -93,7 +93,7 @@ export interface ActualizarUmbralMapaSolicitud {
 }
 
 /**
- * Tipos para la gestión de resolución H3 y polígonos urbanos PostGIS (HU-14).
+ * Tipos para la gestión de resolución H3 y polígonos urbanos PostGIS.
  */
 export interface ConfiguracionEspacialH3 {
   id: string;
@@ -145,7 +145,7 @@ export interface ModificarPoligonoUrbanoSolicitud {
 }
 
 /**
- * Tipos para la gestión de usuarios institucionales (HU-15).
+ * Tipos para la gestión de usuarios institucionales.
  */
 export type EstadoCuentaInstitucional = 'PENDIENTE_APROBACION' | 'ACTIVA' | 'SUSPENDIDA' | 'INACTIVA';
 

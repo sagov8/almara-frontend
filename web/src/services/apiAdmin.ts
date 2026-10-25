@@ -1,5 +1,5 @@
 /**
- * Servicio de comunicación HTTP para el Módulo de Administración de Almara (HU-11 a HU-15, HU-18).
+ * Servicio de comunicación HTTP para el Módulo de Administración de Almara.
  */
 
 import {
@@ -35,7 +35,7 @@ const ADMIN_GEO_ENDPOINT = `${BASE_URL}/api/v1/admin/geo`;
 const ADMIN_INSTITUCIONES_ENDPOINT = `${BASE_URL}/api/v1/admin/instituciones`;
 
 // ----------------------------------------------------------------------------
-// Autenticación de Administrador (HU-11, HU-18)
+// Autenticación de Administrador
 // ----------------------------------------------------------------------------
 
 export async function loginAdmin(
@@ -106,7 +106,7 @@ export async function logoutAdmin(token: string): Promise<LogoutAdminRespuesta> 
 }
 
 // ----------------------------------------------------------------------------
-// Catálogo de Emociones Predeterminadas (HU-12)
+// Catálogo de Emociones Predeterminadas
 // ----------------------------------------------------------------------------
 
 export async function listarEmocionesAdmin(token: string): Promise<EmocionAdmin[]> {
@@ -234,7 +234,7 @@ export const agregarEmocionAdmin = crearEmocionAdmin;
 export const activarEmocionAdmin = reactivarEmocionAdmin;
 
 // ----------------------------------------------------------------------------
-// Umbrales de Privacidad del Mapa (HU-13)
+// Umbrales de Privacidad del Mapa
 // ----------------------------------------------------------------------------
 
 export async function obtenerConfiguracionUmbralesAdmin(
@@ -311,7 +311,7 @@ export async function restablecerUmbralesAdmin(
 }
 
 // ----------------------------------------------------------------------------
-// Zonas Geográficas H3 y Polígonos PostGIS (HU-14)
+// Zonas Geográficas H3 y Polígonos PostGIS
 // ----------------------------------------------------------------------------
 
 export async function obtenerConfiguracionResolucionH3Admin(
@@ -465,7 +465,7 @@ export async function desactivarPoligonoUrbanoAdmin(
 }
 
 // ----------------------------------------------------------------------------
-// Gestión de Usuarios Institucionales (HU-15)
+// Gestión de Usuarios Institucionales
 // ----------------------------------------------------------------------------
 
 export async function listarInstitucionesAdmin(

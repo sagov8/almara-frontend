@@ -122,6 +122,7 @@ export const ModalDetalleZona: React.FC<PropiedadesModalDetalleZona> = ({
                 ]}
               >
                 <IconoEmocion
+                  icono={detalle?.icono}
                   emocion={detalle?.emocionPredominante || 'PROTEGIDA'}
                   color={detalle?.codigoHexColor || '#0284C7'}
                   size={24}

@@ -368,6 +368,7 @@ export const PantallaSeleccionEmocion: React.FC<PropiedadesPantallaSeleccionEmoc
               ]}
             >
               <IconoEmocion
+                icono={emocionSeleccionada?.simboloFacial}
                 emocion={emocionSeleccionada?.id}
                 color={emocionSeleccionada?.colorPrincipal || '#10B981'}
                 size={38}

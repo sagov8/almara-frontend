@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAuthInstitutional } from '../context/AuthInstitutionalContext';
 import { consultarCatalogoPlanes } from '../services/apiInstitutional';
 import { CatalogoPlanesRespuesta } from '../types/institutional';
@@ -67,7 +67,7 @@ export const CatalogoPlanesPage: React.FC = () => {
         {/* Estado de Error */}
         {errorMensaje && !cargando && (
           <div className="max-w-md mx-auto bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center space-y-3 shadow-sm">
-            <span className="text-2xl">⚠️</span>
+            <AlertTriangle className="w-8 h-8 text-rose-500 mx-auto" />
             <p className="text-sm text-rose-700 font-medium">{errorMensaje}</p>
             <button
               onClick={cargarPlanes}

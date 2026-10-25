@@ -48,7 +48,7 @@ export const AdminDashboardPage: React.FC = () => {
             <button
               onClick={manejarCerrarSesion}
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 hover:text-rose-700 border border-slate-200 hover:border-rose-200 text-xs text-slate-700 transition-all font-medium cursor-pointer"
-              title="Cerrar sesión de administrador (HU-18)"
+              title="Cerrar sesión de administrador"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Cerrar sesión</span>
@@ -66,7 +66,7 @@ export const AdminDashboardPage: React.FC = () => {
           <div className="max-w-2xl relative z-10">
             <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full uppercase tracking-wider mb-3">
               <CheckCircle2 className="w-4 h-4 text-amber-600" />
-              <span>Sesión Administrativa Autenticada (HU-11)</span>
+              <span>Sesión Administrativa Autenticada</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Bienvenido, {sesion?.nombreCompleto}
@@ -78,16 +78,16 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Módulos de Administración (Diagrama de Casos de Uso) */}
+        {/* Módulos de Administración */}
         <div className="mb-6">
           <h2 className="text-lg font-bold text-slate-900 mb-1">Módulos de Gestión del Sistema</h2>
           <p className="text-xs text-slate-500">
-            Casos de uso correspondientes al modelo de arquitectura del Módulo de Administración.
+            Herramientas operativas de configuración, privacidad territorial y administración institucional.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Tarjeta HU-12 */}
+          {/* Tarjeta Catálogo de Emociones */}
           <div
             onClick={() => navigate('/admin/emociones')}
             role="button"
@@ -99,7 +99,7 @@ export const AdminDashboardPage: React.FC = () => {
               <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                 <Smile className="w-6 h-6" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">HU-12</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">Catálogo</span>
               <h3 className="text-base font-bold text-slate-900 mt-2 group-hover:text-amber-700 transition-colors">Catálogo de Emociones</h3>
               <p className="text-xs text-slate-600 mt-2 leading-relaxed">
                 Agregar, modificar y desactivar emociones y sus atributos visuales (colores e íconos).
@@ -111,7 +111,7 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Tarjeta HU-13 */}
+          {/* Tarjeta Umbrales del Mapa */}
           <div
             onClick={() => navigate('/admin/umbrales')}
             role="button"
@@ -123,7 +123,7 @@ export const AdminDashboardPage: React.FC = () => {
               <div className="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 border border-sky-200 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                 <Sliders className="w-6 h-6" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-sky-700 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded">HU-13</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-sky-700 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded">Privacidad</span>
               <h3 className="text-base font-bold text-slate-900 mt-2 group-hover:text-sky-700 transition-colors">Umbrales del Mapa</h3>
               <p className="text-xs text-slate-600 mt-2 leading-relaxed">
                 Ajustar parámetro $k$-anonimato para visualizar emociones agregadas y proteger la privacidad.
@@ -135,7 +135,7 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Tarjeta HU-14 */}
+          {/* Tarjeta Zonas Geográficas H3 */}
           <div
             onClick={() => navigate('/admin/zonas-h3')}
             role="button"
@@ -147,7 +147,7 @@ export const AdminDashboardPage: React.FC = () => {
               <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                 <MapPin className="w-6 h-6" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">HU-14</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">Territorio</span>
               <h3 className="text-base font-bold text-slate-900 mt-2 group-hover:text-emerald-700 transition-colors">Zonas Geográficas H3</h3>
               <p className="text-xs text-slate-600 mt-2 leading-relaxed">
                 Ajustar resolución espacial de celdas H3 e indexar polígonos urbanos en PostGIS.
@@ -159,7 +159,7 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Tarjeta HU-15 */}
+          {/* Tarjeta Usuarios Institucionales */}
           <div
             onClick={() => navigate('/admin/instituciones')}
             role="button"
@@ -171,7 +171,7 @@ export const AdminDashboardPage: React.FC = () => {
               <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                 <Building2 className="w-6 h-6" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded">HU-15</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded">Instituciones</span>
               <h3 className="text-base font-bold text-slate-900 mt-2 group-hover:text-indigo-700 transition-colors">Usuarios Institucionales</h3>
               <p className="text-xs text-slate-600 mt-2 leading-relaxed">
                 Aprobar cuentas, suspender o dar de baja, revocar sesiones y notificar vía SMTP/Email.
@@ -188,11 +188,11 @@ export const AdminDashboardPage: React.FC = () => {
         <div className="mt-10 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-amber-600" />
-            <span>Sesión protegida por token JWT con firma HMAC-SHA256 (Expira en 8 horas).</span>
+            <span>Su sesión expira en 8 horas.</span>
           </div>
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-slate-400" />
-            <span>Trazabilidad activa en la tabla <code className="text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded font-mono">auditoria_admin</code>.</span>
+            <span>Trazabilidad activa para log de auditoría</span>
           </div>
         </div>
       </main>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { iniciarSesionInstitucion } from '../services/apiInstitutional';
 import { useAuthInstitutional } from '../context/AuthInstitutionalContext';
 import { ErrorApi } from '../types/institutional';
@@ -11,6 +11,7 @@ export const LoginInstitucionalPage: React.FC = () => {
 
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
+  const [mostrarPassword, setMostrarPassword] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -76,7 +77,7 @@ export const LoginInstitucionalPage: React.FC = () => {
 
           {error && (
             <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start space-x-2.5">
-              <span className="text-base flex-shrink-0">⚠️</span>
+              <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-600 mt-0.5" />
               <p className="flex-1 font-medium">{error}</p>
             </div>
           )}
@@ -105,17 +106,28 @@ export const LoginInstitucionalPage: React.FC = () => {
                   Contraseña
                 </label>
               </div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setError(null);
-                }}
-                placeholder="••••••••••••"
-                required
-                className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
-              />
+              <div className="relative">
+                <input
+                  type={mostrarPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setError(null);
+                  }}
+                  placeholder="••••••••••••"
+                  required
+                  className="w-full pl-4 pr-11 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
+                />
+                <button
+                  type="button"
+                  onClick={() => setMostrarPassword(!mostrarPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                  title={mostrarPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                  aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                >
+                  {mostrarPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <button

@@ -3,7 +3,7 @@ import { Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { useAuthAdmin } from '../context/AuthAdminContext';
 
 /**
- * Componente guardián para proteger las vistas del Módulo de Administración (HU-11, HU-18).
+ * Componente guardián para proteger las vistas del Módulo de Administración.
  * Redirige a /admin/login si el usuario no tiene una sesión administrativa activa
  * e impide el reingreso retrospectivo mediante el botón "Atrás" del navegador tras cerrar sesión.
  */

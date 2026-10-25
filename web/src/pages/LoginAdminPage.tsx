@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Lock, User, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
+import { Shield, Lock, User, AlertCircle, Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { loginAdmin } from '../services/apiAdmin';
 import { useAuthAdmin } from '../context/AuthAdminContext';
 import { ErrorApiAdmin } from '../types/admin';
@@ -11,6 +11,7 @@ export const LoginAdminPage: React.FC = () => {
 
   const [usuarioAdmin, setUsuarioAdmin] = useState('');
   const [passwordAdmin, setPasswordAdmin] = useState('');
+  const [mostrarPassword, setMostrarPassword] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [estaBloqueado, setEstaBloqueado] = useState(false);
@@ -132,14 +133,23 @@ export const LoginAdminPage: React.FC = () => {
                 </div>
                 <input
                   id="passwordAdmin"
-                  type="password"
+                  type={mostrarPassword ? 'text' : 'password'}
                   value={passwordAdmin}
                   onChange={(e) => setPasswordAdmin(e.target.value)}
                   placeholder="••••••••••••"
                   disabled={cargando}
                   required
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all shadow-sm"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all shadow-sm"
                 />
+                <button
+                  type="button"
+                  onClick={() => setMostrarPassword(!mostrarPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                  title={mostrarPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                  aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                >
+                  {mostrarPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 

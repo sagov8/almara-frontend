@@ -35,7 +35,12 @@ export const TarjetaEmocion: React.FC<PropiedadesTarjetaEmocion> = ({
           { backgroundColor: emocion.colorFondoCirculo },
         ]}
       >
-        <IconoEmocion emocion={emocion.id} color={emocion.colorPrincipal} size={36} />
+        <IconoEmocion
+          icono={emocion.simboloFacial}
+          emocion={emocion.id}
+          color={emocion.colorPrincipal}
+          size={36}
+        />
       </View>
       <Text style={estilos.etiqueta}>{emocion.etiqueta}</Text>
     </TouchableOpacity>

@@ -23,7 +23,6 @@ import {
   Loader2,
   ArrowRight,
   ArrowLeft,
-  Sparkles,
   RotateCcw,
   Check,
   FileText,
@@ -122,7 +121,7 @@ export const CheckoutSuscripcionPage: React.FC = () => {
     }
   };
 
-  // Procesar Pago mediante Pasarela Stripe (HU-23)
+  // Procesar Pago mediante Pasarela Stripe
   const handleProcesarPago = async () => {
     if (!orden || !sesion?.tokenAcceso) return;
 
@@ -174,7 +173,7 @@ export const CheckoutSuscripcionPage: React.FC = () => {
     }
   };
 
-  // Reintentar Pago Fallido (Caso de uso extendido HU-23)
+  // Reintentar Pago Fallido
   const handleReintentarPago = async () => {
     if (!orden || !sesion?.tokenAcceso) return;
 
@@ -242,21 +241,22 @@ export const CheckoutSuscripcionPage: React.FC = () => {
             <ArrowLeft className="w-3.5 h-3.5" /> Volver al Catálogo de Planes
           </Link>
           <span>/</span>
-          <span className="text-slate-800 font-semibold">Checkout y Pago Seguro (HU-22 & HU-23)</span>
+          <span className="text-slate-800 font-semibold">Checkout y Pago Seguro</span>
         </div>
 
         {/* Encabezado Principal */}
         <div className="mb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-200 text-sky-700 text-xs font-semibold mb-3">
             <ShoppingBag className="w-3.5 h-3.5" />
-            <span>Módulo de Checkout y Pagos SaaS (HU-22 / HU-23)</span>
+            <span>Módulo de Checkout y Pagos SaaS</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Checkout de Suscripción y Procesamiento de Pago
           </h1>
           <p className="text-slate-600 text-sm mt-1">
-            Revisa tu orden de pedido y procesa el cobro a través de Stripe Sandbox / Test Mode.
+            Revisa tu orden de pedido y procesa el cobro a través de Stripe.
           </p>
+
         </div>
 
         {/* Mensaje de Error */}
@@ -332,7 +332,7 @@ export const CheckoutSuscripcionPage: React.FC = () => {
                 <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3 text-xs text-slate-500">
                   <ShieldCheck className="w-5 h-5 text-emerald-600 flex-shrink-0" />
                   <span>
-                    Conformidad RNF-13 de auditoría institucional y cifrado SSL/TLS de 256 bits con Stripe.
+                    Su transacción es complemetamente segura a través de nuestra alianza con Stripe.
                   </span>
                 </div>
               </div>
@@ -394,7 +394,6 @@ export const CheckoutSuscripcionPage: React.FC = () => {
                         </>
                       ) : (
                         <>
-                          <Sparkles className="w-4 h-4" />
                           <span>Generar Orden de Suscripción</span>
                           <ArrowRight className="w-4 h-4" />
                         </>
@@ -403,7 +402,7 @@ export const CheckoutSuscripcionPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* PASO 2: Procesar Pago de la Orden Generada (HU-23) */}
+                {/* PASO 2: Procesar Pago de la Orden Generada */}
                 {orden && !pagoResultado?.pagoAprobado && (
                   <div className="pt-6 space-y-4">
                     <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
@@ -457,8 +456,8 @@ export const CheckoutSuscripcionPage: React.FC = () => {
 
                       <p className="text-[11px] text-slate-500">
                         {modoDemo === 'APROBAR'
-                          ? '✅ Simula pago aprobado exitoso mediante PaymentIntent de Stripe en tiempo real.'
-                          : '⚠️ Simula fondos insuficientes o tarjeta declinada para probar reintento (HU-23).'}
+                          ? 'Simula pago aprobado exitoso mediante PaymentIntent de Stripe en tiempo real.'
+                          : 'Simula fondos insuficientes o tarjeta declinada para probar reintento de pago.'}
                       </p>
                     </div>
 
@@ -485,7 +484,7 @@ export const CheckoutSuscripcionPage: React.FC = () => {
                           ) : (
                             <>
                               <RotateCcw className="w-4 h-4 flex-shrink-0" />
-                              <span>Reintentar Pago con Visa (Extend HU-23)</span>
+                              <span>Reintentar Pago con Visa</span>
                             </>
                           )}
                         </button>

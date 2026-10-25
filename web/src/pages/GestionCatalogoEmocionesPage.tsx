@@ -16,6 +16,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { useAuthAdmin } from '../context/AuthAdminContext';
+import { IconoEmocionLucide, ICONOS_LUCIDE_CATALOGO } from '../components/IconoEmocionLucide';
 import {
   listarEmocionesAdmin,
   agregarEmocionAdmin,
@@ -46,10 +47,8 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
   const [formEtiqueta, setFormEtiqueta] = useState('');
   const [formColor, setFormColor] = useState('#10B981');
   const [formFondo, setFormFondo] = useState('#D1FAE5');
-  const [formIcono, setFormIcono] = useState('😊');
+  const [formIcono, setFormIcono] = useState('Smile');
   const [formDescripcion, setFormDescripcion] = useState('');
-
-  const emojisSugeridos = ['😊', '😐', '😟', '😠', '😰', '😌', '🥳', '😢', '🤩', '😴', '❤️', '🔥'];
 
   const cargarCatalogo = useCallback(async () => {
     if (!token) return;
@@ -75,7 +74,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
     setFormEtiqueta('');
     setFormColor('#3B82F6');
     setFormFondo('#DBEAFE');
-    setFormIcono('😌');
+    setFormIcono('Smile');
     setFormDescripcion('');
     setError(null);
     setExito(null);
@@ -87,7 +86,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
     setFormEtiqueta(emocion.nombreEtiqueta);
     setFormColor(emocion.codigoHexColor);
     setFormFondo(emocion.codigoHexFondo || emocion.codigoHexColor);
-    setFormIcono(emocion.iconoSvg);
+    setFormIcono(emocion.iconoSvg || 'Smile');
     setFormDescripcion(emocion.descripcion || '');
     setError(null);
     setExito(null);
@@ -217,7 +216,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                 <h1 className="font-extrabold text-slate-900 text-base tracking-tight leading-none">
                   Gestión del Catálogo de Emociones
                 </h1>
-                <span className="text-[11px] text-slate-500">HU-12 • Módulo de Administración</span>
+                <span className="text-[11px] text-slate-500">Módulo de Administración</span>
               </div>
             </div>
           </div>
@@ -238,7 +237,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                 navigate('/admin/login');
               }}
               className="p-2 rounded-lg bg-slate-100 hover:bg-rose-50 hover:text-rose-700 border border-slate-200 text-slate-600 transition cursor-pointer"
-              title="Cerrar sesión de administrador (HU-18)"
+              title="Cerrar sesión de administrador"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -248,12 +247,12 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
 
       {/* Contenido */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Banner de métrica de regla RF-05 */}
+        {/* Banner de métrica de regla del catálogo */}
         <div className="mb-6 bg-white border border-slate-200 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
           <div>
             <div className="flex items-center gap-2 text-xs font-bold text-amber-700 uppercase tracking-wider mb-1">
               <Palette className="w-4 h-4" />
-              <span>Regla de Negocio RF-05</span>
+              <span>Disponibilidad del Catálogo</span>
             </div>
             <p className="text-sm text-slate-600">
               El catálogo debe mantener siempre un mínimo de <strong className="text-slate-900">3 emociones activas</strong> para garantizar el funcionamiento del registro ciudadano.
@@ -321,21 +320,31 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-inner border"
+                        className="w-12 h-12 rounded-xl flex items-center justify-center shadow-inner border"
                         style={{
                           backgroundColor: emocion.codigoHexFondo || emocion.codigoHexColor,
                           borderColor: emocion.codigoHexColor,
                         }}
                       >
-                        <span>{emocion.iconoSvg}</span>
+                        <IconoEmocionLucide
+                          icono={emocion.iconoSvg}
+                          idEmocion={emocion.idEmocion}
+                          color={emocion.codigoHexColor}
+                          className="w-6 h-6"
+                        />
                       </div>
                       <div>
                         <h3 className="font-bold text-slate-900 text-base leading-tight">
                           {emocion.nombreEtiqueta}
                         </h3>
-                        <span className="text-[11px] font-mono font-semibold text-slate-500">
-                          {emocion.idEmocion}
-                        </span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-[11px] font-mono font-semibold text-slate-500">
+                            {emocion.idEmocion}
+                          </span>
+                          <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono">
+                            {emocion.iconoSvg || 'Smile'}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
@@ -415,7 +424,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <Plus className="w-5 h-5 text-amber-600" />
-                <span>Agregar Nueva Emoción (HU-12)</span>
+                <span>Agregar Nueva Emoción</span>
               </h2>
               <button
                 onClick={() => setModalCrearAbierto(false)}
@@ -505,29 +514,47 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">
-                  Ícono o Emoji SVG
+                <label className="block text-xs font-semibold uppercase text-slate-700 mb-1.5">
+                  Ícono Oficial del Catálogo (Lucide)
                 </label>
-                <div className="flex items-center gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={formIcono}
-                    onChange={(e) => setFormIcono(e.target.value)}
-                    placeholder="😌"
-                    required
-                    className="w-20 px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 text-center text-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
-                  />
-                  <div className="flex flex-wrap gap-1.5 flex-1">
-                    {emojisSugeridos.map((emoji) => (
-                      <button
-                        key={emoji}
-                        type="button"
-                        onClick={() => setFormIcono(emoji)}
-                        className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm cursor-pointer border border-slate-200"
-                      >
-                        {emoji}
-                      </button>
-                    ))}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center border shadow-inner flex-shrink-0"
+                      style={{ backgroundColor: formFondo, borderColor: formColor }}
+                    >
+                      <IconoEmocionLucide icono={formIcono} color={formColor} className="w-5 h-5" />
+                    </div>
+                    <input
+                      type="text"
+                      value={formIcono}
+                      onChange={(e) => setFormIcono(e.target.value)}
+                      placeholder="Smile"
+                      required
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 p-2 bg-slate-50 rounded-xl border border-slate-200 max-h-36 overflow-y-auto">
+                    {ICONOS_LUCIDE_CATALOGO.map((item) => {
+                      const ItemIcon = item.Icono;
+                      const seleccionado = formIcono.toLowerCase() === item.id.toLowerCase();
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setFormIcono(item.id)}
+                          title={`${item.nombre} (${item.descripcion})`}
+                          className={`flex flex-col items-center justify-center p-2 rounded-lg text-xs transition cursor-pointer border ${
+                            seleccionado
+                              ? 'bg-amber-100 border-amber-400 text-amber-900 font-bold shadow-sm'
+                              : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-700'
+                          }`}
+                        >
+                          <ItemIcon className="w-4 h-4 mb-0.5" />
+                          <span className="text-[10px] truncate max-w-full">{item.id}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -549,10 +576,10 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
               {/* Vista previa */}
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3">
                 <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center text-xl border"
+                  className="w-10 h-10 rounded-lg flex items-center justify-center border shadow-sm"
                   style={{ backgroundColor: formFondo, borderColor: formColor }}
                 >
-                  {formIcono}
+                  <IconoEmocionLucide icono={formIcono} color={formColor} className="w-5 h-5" />
                 </div>
                 <div>
                   <span className="text-xs font-bold text-slate-900">{formEtiqueta || 'Nombre'}</span>
@@ -658,28 +685,47 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">
-                  Ícono o Emoji SVG
+                <label className="block text-xs font-semibold uppercase text-slate-700 mb-1.5">
+                  Ícono Oficial del Catálogo (Lucide)
                 </label>
-                <div className="flex items-center gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={formIcono}
-                    onChange={(e) => setFormIcono(e.target.value)}
-                    required
-                    className="w-20 px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 text-center text-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
-                  />
-                  <div className="flex flex-wrap gap-1.5 flex-1">
-                    {emojisSugeridos.map((emoji) => (
-                      <button
-                        key={emoji}
-                        type="button"
-                        onClick={() => setFormIcono(emoji)}
-                        className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm cursor-pointer border border-slate-200"
-                      >
-                        {emoji}
-                      </button>
-                    ))}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center border shadow-inner flex-shrink-0"
+                      style={{ backgroundColor: formFondo, borderColor: formColor }}
+                    >
+                      <IconoEmocionLucide icono={formIcono} color={formColor} className="w-5 h-5" />
+                    </div>
+                    <input
+                      type="text"
+                      value={formIcono}
+                      onChange={(e) => setFormIcono(e.target.value)}
+                      placeholder="Smile"
+                      required
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 p-2 bg-slate-50 rounded-xl border border-slate-200 max-h-36 overflow-y-auto">
+                    {ICONOS_LUCIDE_CATALOGO.map((item) => {
+                      const ItemIcon = item.Icono;
+                      const seleccionado = formIcono.toLowerCase() === item.id.toLowerCase();
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setFormIcono(item.id)}
+                          title={`${item.nombre} (${item.descripcion})`}
+                          className={`flex flex-col items-center justify-center p-2 rounded-lg text-xs transition cursor-pointer border ${
+                            seleccionado
+                              ? 'bg-amber-100 border-amber-400 text-amber-900 font-bold shadow-sm'
+                              : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-700'
+                          }`}
+                        >
+                          <ItemIcon className="w-4 h-4 mb-0.5" />
+                          <span className="text-[10px] truncate max-w-full">{item.id}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -700,10 +746,10 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
               {/* Vista previa */}
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3">
                 <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center text-xl border"
+                  className="w-10 h-10 rounded-lg flex items-center justify-center border shadow-sm"
                   style={{ backgroundColor: formFondo, borderColor: formColor }}
                 >
-                  {formIcono}
+                  <IconoEmocionLucide icono={formIcono} color={formColor} className="w-5 h-5" />
                 </div>
                 <div>
                   <span className="text-xs font-bold text-slate-900">{formEtiqueta}</span>

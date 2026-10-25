@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RefreshCw, Loader2 } from 'lucide-react';
+import { RefreshCw, Loader2, AlertTriangle, Check, Lock } from 'lucide-react';
 import { useAuthInstitutional } from '../context/AuthInstitutionalContext';
 import { consultarMiEstadoSuscripcion } from '../services/apiInstitutional';
 import { EstadoSuscripcionRespuesta } from '../types/institutional';
@@ -112,7 +112,7 @@ export const MiSuscripcionPage: React.FC = () => {
         {/* Estado de Error */}
         {errorMensaje && !cargando && (
           <div className="max-w-md mx-auto bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center space-y-3 shadow-sm">
-            <span className="text-2xl">⚠️</span>
+            <AlertTriangle className="w-8 h-8 text-rose-500 mx-auto" />
             <p className="text-sm text-rose-700 font-medium">{errorMensaje}</p>
             <button
               onClick={cargarEstado}
@@ -148,7 +148,7 @@ export const MiSuscripcionPage: React.FC = () => {
                   <ul className="space-y-2.5">
                     {estado.modulosHabilitados.map((mod) => (
                       <li key={mod} className="flex items-center text-xs space-x-2 text-slate-800 bg-emerald-50/50 p-2.5 rounded-xl border border-emerald-100">
-                        <span className="text-emerald-600 font-bold text-sm">✓</span>
+                        <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                         <span className="font-semibold">{mod}</span>
                       </li>
                     ))}
@@ -173,7 +173,7 @@ export const MiSuscripcionPage: React.FC = () => {
                   <ul className="space-y-2.5">
                     {estado.modulosRestringidos.map((mod) => (
                       <li key={mod} className="flex items-center text-xs space-x-2 text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-slate-400">🔒</span>
+                        <Lock className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                         <span>{mod}</span>
                       </li>
                     ))}

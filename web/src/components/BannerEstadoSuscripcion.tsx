@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle, AlertTriangle } from 'lucide-react';
 import { EstadoSuscripcionRespuesta } from '../types/institutional';
 
 interface BannerEstadoSuscripcionProps {
@@ -30,10 +30,10 @@ export const BannerEstadoSuscripcion: React.FC<BannerEstadoSuscripcionProps> = (
           }`}
         >
           <div className="flex items-start sm:items-center space-x-3.5">
-            <span className={`p-2.5 rounded-xl text-xl font-bold flex-shrink-0 ${
+            <span className={`p-2.5 rounded-xl flex-shrink-0 flex items-center justify-center ${
               esExpirada ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-600'
             }`}>
-              {esExpirada ? '⛔' : '⚠️'}
+              {esExpirada ? <AlertCircle className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
             </span>
             <div>
               <h4 className="font-bold text-sm sm:text-base">

@@ -587,6 +587,7 @@ export const MapaInteractivoEmociones: React.FC<PropiedadesMapa> = ({ onSeleccio
                 ]}
               >
                 <IconoEmocion
+                  icono={celdaSeleccionada.icono}
                   emocion={celdaSeleccionada.emocionPredominante || 'PROTEGIDA'}
                   color={celdaSeleccionada.codigoHexColor}
                   size={24}

@@ -246,7 +246,7 @@ export const GestionZonasH3Page: React.FC = () => {
     if (!token) return;
 
     if (!justificacionRes.trim()) {
-      setMensajeError('Debe ingresar una justificación técnica para el log de auditoría (RNF-13)');
+      setMensajeError('Debe ingresar una justificación técnica para el log de auditoría');
       return;
     }
 
@@ -308,7 +308,7 @@ export const GestionZonasH3Page: React.FC = () => {
     }
 
     if (!justificacionPoligono.trim()) {
-      setMensajeError('Debe proporcionar una justificación técnica para el log de auditoría (RNF-13).');
+      setMensajeError('Debe proporcionar una justificación técnica para el log de auditoría.');
       return;
     }
 
@@ -398,9 +398,6 @@ export const GestionZonasH3Page: React.FC = () => {
               </div>
               <div>
                 <span className="font-extrabold text-slate-900 text-base tracking-tight">Zonas Geográficas H3</span>
-                <span className="ml-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  HU-14
-                </span>
               </div>
             </div>
           </div>
@@ -421,7 +418,7 @@ export const GestionZonasH3Page: React.FC = () => {
                 navigate('/admin/login');
               }}
               className="p-2 rounded-lg bg-slate-100 hover:bg-rose-50 hover:text-rose-700 border border-slate-200 text-slate-600 transition cursor-pointer"
-              title="Cerrar sesión de administrador (HU-18)"
+              title="Cerrar sesión de administrador"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -476,14 +473,14 @@ export const GestionZonasH3Page: React.FC = () => {
                 Resolución H3 por Defecto: <span className="text-amber-600 font-mono">Nivel {configH3?.resolucionH3Default ?? 9}</span>
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">
-                Define el tamaño geométrico estándar de las celdas agregadas sobre Popayán. Rango operativo regulado entre <strong className="text-slate-900">7 y 10</strong> para salvaguardar el principio de anonimato (RF-09).
+                Define el tamaño geométrico estándar de las celdas agregadas sobre Popayán. Rango operativo regulado entre <strong className="text-slate-900">7 y 10</strong> para salvaguardar el principio de anonimato.
               </p>
             </div>
 
             <div className="flex items-center gap-2">
               <span className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 flex items-center gap-1.5">
                 <Shield className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Límites RF-09: <b className="text-slate-900 font-mono">7 ≤ Res ≤ 10</b></span>
+                <span>Rango regulado: <b className="text-slate-900 font-mono">7 ≤ Res ≤ 10</b></span>
               </span>
             </div>
           </div>

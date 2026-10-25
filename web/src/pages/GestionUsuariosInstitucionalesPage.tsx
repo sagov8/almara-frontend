@@ -325,7 +325,7 @@ export const GestionUsuariosInstitucionalesPage: React.FC = () => {
                   Gestión de Usuarios Institucionales
                 </h1>
                 <p className="text-sm text-slate-500 mt-1">
-                  Aprobación de cuentas corporativas, suspensión, baja, revocación de sesiones JWT y notificaciones (HU-15)
+                  Aprobación de cuentas corporativas, suspensión, baja, revocación de sesiones JWT y notificaciones
                 </p>
               </div>
             </div>
@@ -346,7 +346,7 @@ export const GestionUsuariosInstitucionalesPage: React.FC = () => {
                 navigate('/admin/login');
               }}
               className="inline-flex items-center gap-2 px-3.5 py-2 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 rounded-xl border border-slate-200 hover:border-rose-200 text-sm font-medium transition-colors shadow-sm cursor-pointer"
-              title="Cerrar sesión de administrador (HU-18)"
+              title="Cerrar sesión de administrador"
             >
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">Cerrar Sesión</span>

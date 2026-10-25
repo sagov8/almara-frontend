@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { AlertTriangle } from 'lucide-react-native';
 
 interface PropsSelectorComentario {
   comentarioInicial?: string;
@@ -100,7 +101,8 @@ export const SelectorComentario: React.FC<PropsSelectorComentario> = ({
       {/* Mensaje de validación / error si se intentaron ingresar números */}
       {errorValidacion && (
         <View style={estilos.bannerError}>
-          <Text style={estilos.textoError}>⚠️ {errorValidacion}</Text>
+          <AlertTriangle size={15} color="#DC2626" style={{ marginRight: 6 }} />
+          <Text style={estilos.textoError}>{errorValidacion}</Text>
         </View>
       )}
 

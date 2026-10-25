@@ -28,6 +28,7 @@ import {
   actualizarConfiguracionUmbralesAdmin,
   restablecerUmbralesAdmin,
 } from '../services/apiAdmin';
+import { IconoEmocionLucide } from '../components/IconoEmocionLucide';
 
 interface ZonaSimulacion {
   nombre: string;
@@ -45,7 +46,7 @@ const ZONAS_SIMULACION_POPAYAN: ZonaSimulacion[] = [
     reportes: 28,
     emocionPredominante: 'ALEGRÍA',
     colorHex: '#10B981',
-    icono: '😊',
+    icono: 'Smile',
   },
   {
     nombre: 'El Empedrado',
@@ -53,7 +54,7 @@ const ZONAS_SIMULACION_POPAYAN: ZonaSimulacion[] = [
     reportes: 14,
     emocionPredominante: 'TRANQUILIDAD',
     colorHex: '#3B82F6',
-    icono: '🌿',
+    icono: 'Meh',
   },
   {
     nombre: 'Pandiguando',
@@ -61,7 +62,7 @@ const ZONAS_SIMULACION_POPAYAN: ZonaSimulacion[] = [
     reportes: 8,
     emocionPredominante: 'ENFADO',
     colorHex: '#EF4444',
-    icono: '😠',
+    icono: 'Flame',
   },
   {
     nombre: 'La Estancia',
@@ -69,7 +70,7 @@ const ZONAS_SIMULACION_POPAYAN: ZonaSimulacion[] = [
     reportes: 4,
     emocionPredominante: 'TRISTEZA',
     colorHex: '#6B7280',
-    icono: '🌧️',
+    icono: 'CloudRain',
   },
   {
     nombre: 'Alfonso López',
@@ -77,7 +78,7 @@ const ZONAS_SIMULACION_POPAYAN: ZonaSimulacion[] = [
     reportes: 2,
     emocionPredominante: 'MIEDO',
     colorHex: '#8B5CF6',
-    icono: '⚡',
+    icono: 'Zap',
   },
 ];
 
@@ -130,7 +131,7 @@ export const GestionUmbralesMapaPage: React.FC = () => {
     if (!token) return;
 
     if (!justificacionAuditoria.trim()) {
-      setMensajeError('Debe ingresar una justificación técnica para el log de auditoría (RNF-13)');
+      setMensajeError('Debe ingresar una justificación técnica para el log de auditoría');
       return;
     }
 
@@ -221,9 +222,6 @@ export const GestionUmbralesMapaPage: React.FC = () => {
               </div>
               <div>
                 <span className="font-extrabold text-slate-900 text-base tracking-tight">Umbrales del Mapa</span>
-                <span className="ml-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
-                  HU-13
-                </span>
               </div>
             </div>
           </div>
@@ -244,7 +242,7 @@ export const GestionUmbralesMapaPage: React.FC = () => {
                 navigate('/admin/login');
               }}
               className="p-2 rounded-lg bg-slate-100 hover:bg-rose-50 hover:text-rose-700 border border-slate-200 text-slate-600 transition cursor-pointer"
-              title="Cerrar sesión de administrador (HU-18)"
+              title="Cerrar sesión de administrador"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -299,7 +297,7 @@ export const GestionUmbralesMapaPage: React.FC = () => {
                 k-Anonimato Territorial: <span className="text-amber-600 font-mono">k ≥ {configuracion?.umbralMinimoK ?? 5}</span> reportes
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">
-                Cualquier hexágono o zona de Popayán con un número menor a <span className="font-bold text-slate-900">{configuracion?.umbralMinimoK ?? 5} reportes</span> oculta su coloración y entra en estado de reserva ciudadana (RF-23).
+                Cualquier hexágono o zona de Popayán con un número menor a <span className="font-bold text-slate-900">{configuracion?.umbralMinimoK ?? 5} reportes</span> oculta su coloración y entra en estado de reserva ciudadana.
               </p>
             </div>
 
@@ -327,11 +325,8 @@ export const GestionUmbralesMapaPage: React.FC = () => {
               <div>
                 <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                   <Sliders className="w-4 h-4 text-sky-600" />
-                  <span>Calibrar Parámetros en Caliente</span>
+                  <span>Calibrar Parámetros</span>
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Los cambios se propagan de forma atómica e inmediata a la memoria caché (&lt; 500 ms).
-                </p>
               </div>
 
               <button
@@ -350,7 +345,7 @@ export const GestionUmbralesMapaPage: React.FC = () => {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <label htmlFor="input-slider-k" className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Umbral Mínimo $k$-Anonimato:
+                    Umbral Mínimo k-Anonimato:
                   </label>
                   <span className="text-lg font-black font-mono text-amber-700 px-3 py-1 bg-amber-50 border border-amber-200 rounded-xl">
                     k = {umbralK}
@@ -431,7 +426,7 @@ export const GestionUmbralesMapaPage: React.FC = () => {
                         : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                     }`}
                   >
-                    <span>{modoEstricto ? 'Ocultamiento Total (RF-23)' : 'Despliegue Suave con Escudo'}</span>
+                    <span>{modoEstricto ? 'Ocultamiento Total' : 'Despliegue Suave con Escudo'}</span>
                     {modoEstricto ? <EyeOff className="w-4 h-4 text-emerald-600" /> : <Eye className="w-4 h-4 text-slate-400" />}
                   </button>
                   <span className="text-[11px] text-slate-500 mt-1 block">Impide la inferencia de emociones aisladas</span>
@@ -454,7 +449,7 @@ export const GestionUmbralesMapaPage: React.FC = () => {
                 />
               </div>
 
-              {/* Justificación de Auditoría Obligatoria (RNF-13) */}
+              {/* Justificación de Auditoría Obligatoria */}
               <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200">
                 <label htmlFor="input-justificacion-auditoria" className="block text-xs font-bold text-amber-800 uppercase tracking-wider mb-1">
                   Justificación Técnica para Auditoría (Requerida *):
@@ -469,7 +464,7 @@ export const GestionUmbralesMapaPage: React.FC = () => {
                   required
                 />
                 <span className="text-[11px] text-amber-700 mt-1 block">
-                  Quedará registrada de forma inmutable en la tabla <code className="font-mono text-amber-900 bg-amber-100 px-1 py-0.5 rounded">auditoria_admin</code> (RNF-13).
+                  Quedará registrada de forma inmutable en la tabla <code className="font-mono text-amber-900 bg-amber-100 px-1 py-0.5 rounded">auditoria_admin</code>.
                 </span>
               </div>
 
@@ -488,7 +483,7 @@ export const GestionUmbralesMapaPage: React.FC = () => {
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4" />
-                      <span>Aplicar Umbral en Caliente (HU-13)</span>
+                      <span>Aplicar Umbral en Caliente</span>
                     </>
                   )}
                 </button>
@@ -525,7 +520,12 @@ export const GestionUmbralesMapaPage: React.FC = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <span className="text-lg">{zona.icono}</span>
+                        <div
+                          className="w-8 h-8 rounded-lg flex items-center justify-center border shadow-inner"
+                          style={{ backgroundColor: `${zona.colorHex}18`, borderColor: `${zona.colorHex}35` }}
+                        >
+                          <IconoEmocionLucide icono={zona.icono} color={zona.colorHex} className="w-4 h-4" />
+                        </div>
                         <div>
                           <span className="text-xs font-bold text-slate-900 block">{zona.nombre}</span>
                           <span className="text-[10px] text-slate-500">{zona.sector}</span>
@@ -573,7 +573,7 @@ export const GestionUmbralesMapaPage: React.FC = () => {
             <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 flex items-start gap-2">
               <Info className="w-4 h-4 text-sky-600 flex-shrink-0 mt-0.5" />
               <span>
-                <strong>Regla RF-23:</strong> Si una zona no acumula al menos <span className="text-amber-700 font-mono font-bold">k reportes</span>, el mapa jamás divulgará emociones individuales para salvaguardar la intimidad de los habitantes.
+                <strong>Regla de Privacidad:</strong> Si una zona no acumula al menos <span className="text-amber-700 font-mono font-bold">k reportes</span>, el mapa jamás divulgará emociones individuales para salvaguardar la intimidad de los habitantes.
               </span>
             </div>
           </div>

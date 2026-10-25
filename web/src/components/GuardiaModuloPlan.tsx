@@ -12,7 +12,7 @@ interface GuardiaModuloPlanProps {
 }
 
 /**
- * Componente guardián que restringe secciones del sistema según los permisos del plan activo (HU-20).
+ * Componente guardián que restringe secciones del sistema según los permisos del plan activo.
  * Si el módulo no está habilitado, renderiza una tarjeta de bloqueo con opción de Upgrade.
  */
 export const GuardiaModuloPlan: React.FC<GuardiaModuloPlanProps> = ({

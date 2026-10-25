@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2, CheckCircle2 } from 'lucide-react';
+import { Loader2, CheckCircle2, Eye, EyeOff, AlertTriangle, Mail, Sparkles, Check, X } from 'lucide-react';
 import {
   registrarInstitucion,
   verificarCorreoInstitucion,
@@ -40,6 +40,10 @@ export const RegistroInstitucionalPage: React.FC = () => {
   const [verificando, setVerificando] = useState(false);
   const [cuentaActivada, setCuentaActivada] = useState(false);
 
+  const [mostrarPassword, setMostrarPassword] = useState(false);
+  const [confirmarPassword, setConfirmarPassword] = useState('');
+  const [mostrarConfirmarPassword, setMostrarConfirmarPassword] = useState(false);
+
   // Validación de robustez de contraseña en tiempo real
   const tieneMinimo8 = formulario.password.length >= 8;
   const tieneMayuscula = /[A-Z]/.test(formulario.password);
@@ -47,6 +51,7 @@ export const RegistroInstitucionalPage: React.FC = () => {
   const tieneNumero = /\d/.test(formulario.password);
   const tieneSimbolo = /[@#$%^&+=!*()_\-[\]{}|;:,.<>?/~`]/.test(formulario.password);
   const passwordValido = tieneMinimo8 && tieneMayuscula && tieneMinuscula && tieneNumero && tieneSimbolo;
+  const passwordsCoinciden = formulario.password.length > 0 && formulario.password === confirmarPassword;
 
   // Validación de dominio corporativo en tiempo real
   const dominio = formulario.correoCorporativo.includes('@')
@@ -70,6 +75,10 @@ export const RegistroInstitucionalPage: React.FC = () => {
     }
     if (!passwordValido) {
       setError('La contraseña no cumple con todos los requisitos de seguridad obligatorios.');
+      return;
+    }
+    if (!passwordsCoinciden) {
+      setError('Las contraseñas no coinciden. Por favor confirme su contraseña.');
       return;
     }
 
@@ -138,7 +147,7 @@ export const RegistroInstitucionalPage: React.FC = () => {
         <div className="bg-white border border-slate-200 rounded-3xl p-7 sm:p-10 shadow-xl">
           {error && (
             <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start space-x-2.5">
-              <span className="text-base flex-shrink-0">⚠️</span>
+              <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-600 mt-0.5" />
               <p className="flex-1 font-medium">{error}</p>
             </div>
           )}
@@ -240,7 +249,7 @@ export const RegistroInstitucionalPage: React.FC = () => {
                 />
                 {esDominioProhibido && (
                   <p className="text-xs text-amber-700 mt-1.5 flex items-center space-x-1 font-medium">
-                    <span>⚠️</span>
+                    <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 text-amber-600" />
                     <span>No se admiten dominios personales ({dominio}). Utilice el dominio oficial de su institución.</span>
                   </p>
                 )}
@@ -250,40 +259,100 @@ export const RegistroInstitucionalPage: React.FC = () => {
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">
                   Contraseña de Acceso *
                 </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formulario.password}
-                  onChange={manejarCambio}
-                  placeholder="••••••••••••"
-                  required
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
-                />
+                <div className="relative">
+                  <input
+                    type={mostrarPassword ? 'text' : 'password'}
+                    name="password"
+                    value={formulario.password}
+                    onChange={manejarCambio}
+                    placeholder="••••••••••••"
+                    required
+                    className="w-full pl-4 pr-11 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setMostrarPassword(!mostrarPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                    title={mostrarPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                    aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                  >
+                    {mostrarPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
 
                 {/* Checklist de Requisitos de Contraseña */}
                 <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
-                  <span className={tieneMinimo8 ? 'text-emerald-600 font-semibold' : 'text-slate-400'}>
-                    {tieneMinimo8 ? '✓' : '○'} Mínimo 8 caracteres
+                  <span className={`inline-flex items-center gap-1 ${tieneMinimo8 ? 'text-emerald-600 font-semibold' : 'text-slate-400'}`}>
+                    {tieneMinimo8 ? <Check className="w-3 h-3 stroke-[2.5]" /> : <span className="w-1.5 h-1.5 rounded-full bg-slate-300 inline-block mr-0.5"></span>}
+                    <span>Mínimo 8 caracteres</span>
                   </span>
-                  <span className={tieneMayuscula ? 'text-emerald-600 font-semibold' : 'text-slate-400'}>
-                    {tieneMayuscula ? '✓' : '○'} Una mayúscula
+                  <span className={`inline-flex items-center gap-1 ${tieneMayuscula ? 'text-emerald-600 font-semibold' : 'text-slate-400'}`}>
+                    {tieneMayuscula ? <Check className="w-3 h-3 stroke-[2.5]" /> : <span className="w-1.5 h-1.5 rounded-full bg-slate-300 inline-block mr-0.5"></span>}
+                    <span>Una mayúscula</span>
                   </span>
-                  <span className={tieneMinuscula ? 'text-emerald-600 font-semibold' : 'text-slate-400'}>
-                    {tieneMinuscula ? '✓' : '○'} Una minúscula
+                  <span className={`inline-flex items-center gap-1 ${tieneMinuscula ? 'text-emerald-600 font-semibold' : 'text-slate-400'}`}>
+                    {tieneMinuscula ? <Check className="w-3 h-3 stroke-[2.5]" /> : <span className="w-1.5 h-1.5 rounded-full bg-slate-300 inline-block mr-0.5"></span>}
+                    <span>Una minúscula</span>
                   </span>
-                  <span className={tieneNumero ? 'text-emerald-600 font-semibold' : 'text-slate-400'}>
-                    {tieneNumero ? '✓' : '○'} Un número
+                  <span className={`inline-flex items-center gap-1 ${tieneNumero ? 'text-emerald-600 font-semibold' : 'text-slate-400'}`}>
+                    {tieneNumero ? <Check className="w-3 h-3 stroke-[2.5]" /> : <span className="w-1.5 h-1.5 rounded-full bg-slate-300 inline-block mr-0.5"></span>}
+                    <span>Un número</span>
                   </span>
-                  <span className={tieneSimbolo ? 'text-emerald-600 font-semibold' : 'text-slate-400'}>
-                    {tieneSimbolo ? '✓' : '○'} Carácter especial (@$!%*?)
+                  <span className={`inline-flex items-center gap-1 ${tieneSimbolo ? 'text-emerald-600 font-semibold' : 'text-slate-400'}`}>
+                    {tieneSimbolo ? <Check className="w-3 h-3 stroke-[2.5]" /> : <span className="w-1.5 h-1.5 rounded-full bg-slate-300 inline-block mr-0.5"></span>}
+                    <span>Carácter especial (@$!%*?)</span>
                   </span>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">
+                  Confirmar Contraseña *
+                </label>
+                <div className="relative">
+                  <input
+                    type={mostrarConfirmarPassword ? 'text' : 'password'}
+                    name="confirmarPassword"
+                    value={confirmarPassword}
+                    onChange={(e) => {
+                      setConfirmarPassword(e.target.value);
+                      setError(null);
+                    }}
+                    placeholder="••••••••••••"
+                    required
+                    className="w-full pl-4 pr-11 py-3 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setMostrarConfirmarPassword(!mostrarConfirmarPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                    title={mostrarConfirmarPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                    aria-label={mostrarConfirmarPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                  >
+                    {mostrarConfirmarPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {confirmarPassword.length > 0 && (
+                  <p className={`text-xs mt-1.5 font-medium inline-flex items-center gap-1 ${passwordsCoinciden ? 'text-emerald-600' : 'text-rose-600'}`}>
+                    {passwordsCoinciden ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                        <span>Las contraseñas coinciden</span>
+                      </>
+                    ) : (
+                      <>
+                        <X className="w-3.5 h-3.5" />
+                        <span>Las contraseñas no coinciden</span>
+                      </>
+                    )}
+                  </p>
+                )}
               </div>
 
               <button
                 id="btn-registro-submit"
                 type="submit"
-                disabled={cargando || esDominioProhibido || !passwordValido}
+                disabled={cargando || esDominioProhibido || !passwordValido || !passwordsCoinciden}
                 aria-busy={cargando}
                 className="w-full py-3.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-sky-600 via-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white shadow-lg shadow-sky-500/20 transition-all focus:outline-none focus:ring-2 focus:ring-sky-400 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
               >
@@ -300,8 +369,8 @@ export const RegistroInstitucionalPage: React.FC = () => {
           ) : (
             /* Pantalla de Confirmación y Verificación de Correo */
             <div className="text-center space-y-6">
-              <div className="w-16 h-16 rounded-full bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center text-3xl mx-auto shadow-sm">
-                ✉️
+              <div className="w-16 h-16 rounded-full bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center mx-auto shadow-sm">
+                <Mail className="w-8 h-8" />
               </div>
 
               <div>
@@ -381,7 +450,10 @@ export const RegistroInstitucionalPage: React.FC = () => {
 
                 {cuentaActivada && (
                   <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs text-center space-y-3">
-                    <p className="font-semibold text-sm">🎉 ¡Cuenta institucional activada con éxito!</p>
+                    <p className="font-semibold text-sm flex items-center justify-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-emerald-600" />
+                      <span>¡Cuenta institucional activada con éxito!</span>
+                    </p>
                     <p className="text-emerald-700">
                       Su correo corporativo ha sido verificado satisfactoriamente y se ha asignado el Plan Institucional Base. Ya puede acceder con sus credenciales.
                     </p>

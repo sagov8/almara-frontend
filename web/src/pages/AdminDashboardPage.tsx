@@ -126,7 +126,7 @@ export const AdminDashboardPage: React.FC = () => {
               <span className="text-[10px] font-bold uppercase tracking-wider text-sky-700 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded">Privacidad</span>
               <h3 className="text-base font-bold text-slate-900 mt-2 group-hover:text-sky-700 transition-colors">Umbrales del Mapa</h3>
               <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                Ajustar parámetro $k$-anonimato para visualizar emociones agregadas y proteger la privacidad.
+                Ajustar parámetro k-anonimato para visualizar emociones agregadas y proteger la privacidad.
               </p>
             </div>
             <div className="mt-5 pt-4 border-t border-slate-100 text-xs text-slate-500 flex items-center justify-between">

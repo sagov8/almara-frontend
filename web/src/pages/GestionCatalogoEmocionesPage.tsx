@@ -44,11 +44,31 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
 
   // Campos de formulario
   const [formId, setFormId] = useState('');
+  const [idEditadoManualmente, setIdEditadoManualmente] = useState(false);
   const [formEtiqueta, setFormEtiqueta] = useState('');
   const [formColor, setFormColor] = useState('#10B981');
   const [formFondo, setFormFondo] = useState('#D1FAE5');
   const [formIcono, setFormIcono] = useState('Smile');
   const [formDescripcion, setFormDescripcion] = useState('');
+
+  const normalizarIdEmocion = (valor: string): string =>
+    valor
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/ñ/gi, 'N')
+      .toUpperCase()
+      .replace(/[\s-]+/g, '_')
+      .replace(/[^A-Z0-9_]/g, '')
+      .slice(0, 20);
+
+  const formatearErrorApi = (err: unknown, mensajePorDefecto: string): string => {
+    const errorApi = err as ErrorApiAdmin;
+    if (errorApi?.detallesAdicionales && Object.keys(errorApi.detallesAdicionales).length > 0) {
+      const detalles = Object.values(errorApi.detallesAdicionales).join('. ');
+      if (detalles) return detalles;
+    }
+    return errorApi?.mensaje || mensajePorDefecto;
+  };
 
   const cargarCatalogo = useCallback(async () => {
     if (!token) return;
@@ -71,6 +91,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
 
   const abrirModalCrear = () => {
     setFormId('');
+    setIdEditadoManualmente(false);
     setFormEtiqueta('');
     setFormColor('#3B82F6');
     setFormFondo('#DBEAFE');
@@ -95,8 +116,9 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
 
   const manejarCrear = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formId.trim() || !formEtiqueta.trim() || !formColor.trim() || !formIcono.trim()) {
-      setError('Por favor complete los campos obligatorios.');
+    const idLimpio = normalizarIdEmocion(formId || formEtiqueta);
+    if (!idLimpio || idLimpio.length < 2 || !formEtiqueta.trim() || !formColor.trim() || !formIcono.trim()) {
+      setError('Por favor complete los campos obligatorios (el identificador debe tener al menos 2 caracteres).');
       return;
     }
 
@@ -106,12 +128,12 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
 
     try {
       const solicitud: CrearEmocionSolicitud = {
-        idEmocion: formId.trim().toUpperCase(),
-        nombreEtiqueta: formEtiqueta.trim(),
+        idEmocion: idLimpio,
+        nombreEtiqueta: formEtiqueta.trim().slice(0, 30),
         codigoHexColor: formColor.trim(),
         codigoHexFondo: formFondo.trim() || formColor.trim(),
         iconoSvg: formIcono.trim(),
-        descripcion: formDescripcion.trim() || undefined,
+        descripcion: formDescripcion.trim() ? formDescripcion.trim().slice(0, 150) : undefined,
       };
 
       const creada = await agregarEmocionAdmin(token, solicitud);
@@ -119,8 +141,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
       setModalCrearAbierto(false);
       await cargarCatalogo();
     } catch (err) {
-      const errorApi = err as ErrorApiAdmin;
-      setError(errorApi.mensaje || 'Error al agregar la emoción.');
+      setError(formatearErrorApi(err, 'Error al agregar la emoción.'));
     } finally {
       setProcesando(false);
     }
@@ -140,11 +161,11 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
 
     try {
       const solicitud: ModificarEmocionSolicitud = {
-        nombreEtiqueta: formEtiqueta.trim(),
+        nombreEtiqueta: formEtiqueta.trim().slice(0, 30),
         codigoHexColor: formColor.trim(),
         codigoHexFondo: formFondo.trim() || formColor.trim(),
         iconoSvg: formIcono.trim(),
-        descripcion: formDescripcion.trim() || undefined,
+        descripcion: formDescripcion.trim() ? formDescripcion.trim().slice(0, 150) : undefined,
       };
 
       const modificada = await modificarEmocionAdmin(token, emocionSeleccionada.idEmocion, solicitud);
@@ -152,8 +173,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
       setModalEditarAbierto(false);
       await cargarCatalogo();
     } catch (err) {
-      const errorApi = err as ErrorApiAdmin;
-      setError(errorApi.mensaje || 'Error al modificar la emoción.');
+      setError(formatearErrorApi(err, 'Error al modificar la emoción.'));
     } finally {
       setProcesando(false);
     }
@@ -434,6 +454,20 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
               </button>
             </div>
 
+            {error && (
+              <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-rose-600" />
+                <span className="flex-1">{error}</span>
+                <button
+                  type="button"
+                  onClick={() => setError(null)}
+                  className="text-rose-500 hover:text-rose-800 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
             <form onSubmit={manejarCrear} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -443,12 +477,16 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                   <input
                     type="text"
                     value={formId}
-                    onChange={(e) => setFormId(e.target.value.toUpperCase())}
+                    onChange={(e) => {
+                      setIdEditadoManualmente(true);
+                      setFormId(normalizarIdEmocion(e.target.value));
+                    }}
                     placeholder="CALMA"
+                    maxLength={20}
                     required
                     className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 font-mono text-sm uppercase focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
                   />
-                  <span className="text-[10px] text-slate-500">Ej: CALMA, SORPRESA</span>
+                  <span className="text-[10px] text-slate-500">Se normaliza sin tildes ni espacios (Ej: ALEGRIA)</span>
                 </div>
 
                 <div>
@@ -458,8 +496,15 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                   <input
                     type="text"
                     value={formEtiqueta}
-                    onChange={(e) => setFormEtiqueta(e.target.value)}
+                    onChange={(e) => {
+                      const nuevoValor = e.target.value;
+                      setFormEtiqueta(nuevoValor);
+                      if (!idEditadoManualmente) {
+                        setFormId(normalizarIdEmocion(nuevoValor));
+                      }
+                    }}
                     placeholder="Calma"
+                    maxLength={30}
                     required
                     className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
                   />
@@ -625,6 +670,20 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
               </button>
             </div>
 
+            {error && (
+              <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-rose-600" />
+                <span className="flex-1">{error}</span>
+                <button
+                  type="button"
+                  onClick={() => setError(null)}
+                  className="text-rose-500 hover:text-rose-800 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
             <form onSubmit={manejarEditar} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold uppercase text-slate-700 mb-1">
@@ -634,6 +693,7 @@ export const GestionCatalogoEmocionesPage: React.FC = () => {
                   type="text"
                   value={formEtiqueta}
                   onChange={(e) => setFormEtiqueta(e.target.value)}
+                  maxLength={30}
                   required
                   className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none shadow-sm"
                 />
